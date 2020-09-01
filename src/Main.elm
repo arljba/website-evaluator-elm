@@ -1,12 +1,14 @@
 module Main exposing (..)
 
+----Draggable will be used to check the layout of current and furure elements
+
 import Browser
 import Browser.Events as Events
-----Draggable will be used to check the layout of current and furure elements
 import Draggable
 import Html exposing (Html, button, div, h1, h2, input, p, text)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Http
 import Json.Decode as D
 
 
@@ -18,6 +20,7 @@ type alias Model =
     { websiteUrl : String
     , position : ( Int, Int )
     , drag : Draggable.State String
+    , speedDetails : SpeedDetails
     }
 
 
@@ -26,6 +29,7 @@ initialModel =
     { websiteUrl = ""
     , position = ( 0, 0 )
     , drag = Draggable.init
+    , speedDetails = SpeedDetails "0" "0"
     }
 
 
@@ -42,13 +46,14 @@ type Msg
     = ClickCheckWebsite
     | OnDragBy Draggable.Delta
     | DragMsg (Draggable.Msg String)
+    | GotSpeed (Result Http.Error SpeedDetails)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ClickCheckWebsite ->
-            ( model, checkWebsite model.websiteUrl )
+            ( model, fetchFromGooglePageSpeedTest )
 
         OnDragBy ( dx, dy ) ->
             let
@@ -56,6 +61,14 @@ update msg model =
                     model.position
             in
             ( { model | position = ( round (toFloat x + dx), round (toFloat y + dy) ) }, Cmd.none )
+
+        GotSpeed result ->
+            case result of
+                Ok details ->
+                    ( { model | websiteUrl = "Sucess", speedDetails = (SpeedDetails details.timeToInteractive details.firstContentfulPaint)}, Cmd.none )
+
+                Err err ->
+                    ( { model | websiteUrl = errorToString err }, Cmd.none )
 
         DragMsg dragMsg ->
             Draggable.update dragConfig dragMsg model
@@ -78,6 +91,12 @@ json =
   "email" : "arne-baumann@gmail.com"
 }
 """
+
+
+type alias SpeedDetails =
+    { timeToInteractive : String
+    , firstContentfulPaint : String
+    }
 
 
 
@@ -121,6 +140,51 @@ decoderToString string =
             div [ class "output" ]
                 [ text "Error" ]
 
+renderSpeedDetails : SpeedDetails -> Html Msg
+renderSpeedDetails sd = 
+        div [ class "output" ]
+            [ text (String.concat ["Time until interactive: ", sd.timeToInteractive, "First element loaded in: " , sd.firstContentfulPaint ]) ]
+
+gpstDecoder : D.Decoder SpeedDetails
+gpstDecoder =
+    D.map2 SpeedDetails
+        (D.field "lighthouseResult" (D.field "audits" (D.field "interactive" (D.field "displayValue" D.string))))
+        (D.field "lighthouseResult" (D.field "audits" (D.field "first-contentful-paint" (D.field "displayValue" D.string))))
+        --- For some reason "d.at" doent work with D.at maybe look at it later
+
+
+fetchFromGooglePageSpeedTest : Cmd Msg
+fetchFromGooglePageSpeedTest =
+    Http.get
+        { url = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=https://hs-flensburg.de&&key=AIzaSyBfcmkhsGWVmLlVYn0YkTk6dDZFrcbbXV4&&category=PERFORMANCE&&strategy=DESKTOP"
+        , expect = Http.expectJson GotSpeed gpstDecoder
+        }
+
+
+errorToString : Http.Error -> String
+errorToString error =
+    case error of
+        Http.BadUrl url ->
+            "The URL " ++ url ++ " was invalid"
+
+        Http.Timeout ->
+            "Unable to reach the server, try again"
+
+        Http.NetworkError ->
+            "Unable to reach the server, check your network connection"
+
+        Http.BadStatus 500 ->
+            "The server had a problem, try again later"
+
+        Http.BadStatus 400 ->
+            "Verify your information and try again"
+
+        Http.BadStatus _ ->
+            "Unknown error"
+
+        Http.BadBody errorMessage ->
+            errorMessage
+
 
 
 ---- Constants ----
@@ -135,7 +199,7 @@ view model =
             [ button [ class "btn btn-success", onClick ClickCheckWebsite ] [ text "Check" ]
             ]
         , div [ class "output" ]
-            [ decoderToString json ]
+            [ renderSpeedDetails model.speedDetails ]
         ]
 
 
