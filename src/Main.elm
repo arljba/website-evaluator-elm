@@ -2,11 +2,12 @@ module Main exposing (..)
 
 import Browser
 import Browser.Events as Events
-----Draggable will be used to check the layout of current and furure elements 
-import Draggable 
-import Html exposing (Html, button, div, h1, h2, p, input, text)
+----Draggable will be used to check the layout of current and furure elements
+import Draggable
+import Html exposing (Html, button, div, h1, h2, input, p, text)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Json.Decode as D
 
 
 
@@ -55,13 +56,31 @@ update msg model =
                     model.position
             in
             ( { model | position = ( round (toFloat x + dx), round (toFloat y + dy) ) }, Cmd.none )
-        
+
         DragMsg dragMsg ->
             Draggable.update dragConfig dragMsg model
 
 
 
 ---- Custom Types ----
+
+
+type alias User =
+    { id : Int
+    , email : String
+    }
+
+
+json =
+    """
+{
+  "id" : 1,
+  "email" : "arne-baumann@gmail.com"
+}
+"""
+
+
+
 ---- Subscriptions ----
 
 
@@ -78,9 +97,30 @@ checkWebsite : String -> Cmd Msg
 checkWebsite websiteUrl =
     Cmd.none
 
+
 dragConfig : Draggable.Config String Msg
 dragConfig =
     Draggable.basicConfig OnDragBy
+
+
+testDecoder : D.Decoder User
+testDecoder =
+    D.map2 User
+        (D.field "id" D.int)
+        (D.field "email" D.string)
+
+
+decoderToString : String -> Html Msg
+decoderToString string =
+    case string |> D.decodeString testDecoder of
+        Ok user ->
+            div [ class "output" ]
+                [ text user.email ]
+
+        Err err ->
+            div [ class "output" ]
+                [ text "Error" ]
+
 
 
 ---- Constants ----
@@ -94,6 +134,8 @@ view model =
         , p [ class "text-center" ]
             [ button [ class "btn btn-success", onClick ClickCheckWebsite ] [ text "Check" ]
             ]
+        , div [ class "output" ]
+            [ decoderToString json ]
         ]
 
 
