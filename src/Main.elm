@@ -9,7 +9,10 @@ import Html exposing (Html, button, div, h1, h2, input, p, text)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
+import Http.Xml
 import Json.Decode as D
+import Url as U
+import Xml.Decode as X
 
 
 
@@ -21,6 +24,7 @@ type alias Model =
     , position : ( Int, Int )
     , drag : Draggable.State String
     , speedDetails : SpeedDetails
+    , domainOwnershipDetails : DomainOwnershipDetails
     }
 
 
@@ -30,6 +34,7 @@ initialModel =
     , position = ( 0, 0 )
     , drag = Draggable.init
     , speedDetails = SpeedDetails "0" "0"
+    , domainOwnershipDetails = DomainOwnershipDetails "0" "0" "0"
     }
 
 
@@ -47,13 +52,14 @@ type Msg
     | OnDragBy Draggable.Delta
     | DragMsg (Draggable.Msg String)
     | GotSpeed (Result Http.Error SpeedDetails)
+    | GotDomain (Result Http.Error DomainOwnershipDetails)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ClickCheckWebsite ->
-            ( model, fetchFromGooglePageSpeedTest )
+            ( model, Cmd.batch [ fetchFromGooglePageSpeedTest, fetchFromWhoIsXML ] )
 
         OnDragBy ( dx, dy ) ->
             let
@@ -65,7 +71,15 @@ update msg model =
         GotSpeed result ->
             case result of
                 Ok details ->
-                    ( { model | websiteUrl = "Sucess", speedDetails = (SpeedDetails details.timeToInteractive details.firstContentfulPaint)}, Cmd.none )
+                    ( { model | websiteUrl = "Sucess", speedDetails = SpeedDetails details.timeToInteractive details.firstContentfulPaint }, Cmd.none )
+
+                Err err ->
+                    ( { model | websiteUrl = errorToString err }, Cmd.none )
+
+        GotDomain result ->
+            case result of
+                Ok details ->
+                    ( { model | websiteUrl = "Sucess", domainOwnershipDetails = DomainOwnershipDetails details.organization details.state details.country }, Cmd.none )
 
                 Err err ->
                     ( { model | websiteUrl = errorToString err }, Cmd.none )
@@ -96,6 +110,13 @@ json =
 type alias SpeedDetails =
     { timeToInteractive : String
     , firstContentfulPaint : String
+    }
+
+
+type alias DomainOwnershipDetails =
+    { organization : String
+    , state : String
+    , country : String
     }
 
 
@@ -140,17 +161,36 @@ decoderToString string =
             div [ class "output" ]
                 [ text "Error" ]
 
+
 renderSpeedDetails : SpeedDetails -> Html Msg
-renderSpeedDetails sd = 
-        div [ class "output" ]
-            [ text (String.concat ["Time until interactive: ", sd.timeToInteractive, "First element loaded in: " , sd.firstContentfulPaint ]) ]
+renderSpeedDetails sd =
+    div [ class "output" ]
+        [ text (String.concat [ "Time until interactive: ", sd.timeToInteractive, "First element loaded in: ", sd.firstContentfulPaint ]) ]
+
+
+renderDomainDetails : DomainOwnershipDetails -> Html Msg
+renderDomainDetails dod =
+    div [ class "output" ]
+        [ text (String.concat [ "Orginization: ", dod.organization, "State: ", dod.state, "Country: ", dod.country ]) ]
+
 
 gpstDecoder : D.Decoder SpeedDetails
 gpstDecoder =
     D.map2 SpeedDetails
         (D.field "lighthouseResult" (D.field "audits" (D.field "interactive" (D.field "displayValue" D.string))))
         (D.field "lighthouseResult" (D.field "audits" (D.field "first-contentful-paint" (D.field "displayValue" D.string))))
-        --- For some reason "d.at" doent work with D.at maybe look at it later
+
+
+wixDecoder : X.Decoder DomainOwnershipDetails
+wixDecoder =
+    X.map3 DomainOwnershipDetails
+        (X.path [ "registrant", "organization" ] (X.single X.string))
+        (X.path [ "registrant", "state" ] (X.single X.string))
+        (X.path [ "registrant", "country" ] (X.single X.string))
+
+
+
+--- For some reason "d.at" doent work with D.at maybe look at it later
 
 
 fetchFromGooglePageSpeedTest : Cmd Msg
@@ -158,6 +198,14 @@ fetchFromGooglePageSpeedTest =
     Http.get
         { url = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=https://hs-flensburg.de&&key=AIzaSyBfcmkhsGWVmLlVYn0YkTk6dDZFrcbbXV4&&category=PERFORMANCE&&strategy=DESKTOP"
         , expect = Http.expectJson GotSpeed gpstDecoder
+        }
+
+
+fetchFromWhoIsXML : Cmd Msg
+fetchFromWhoIsXML =
+    Http.get
+        { url = "https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_XRwFO1KDNvYMqdy0QfkAGpMhB7i58&domainName=google.com"
+        , expect = Http.Xml.expectXml GotDomain wixDecoder
         }
 
 
@@ -200,6 +248,8 @@ view model =
             ]
         , div [ class "output" ]
             [ renderSpeedDetails model.speedDetails ]
+        , div [ class "output" ]
+            [ renderDomainDetails model.domainOwnershipDetails ]
         ]
 
 
