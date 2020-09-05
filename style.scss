@@ -1,0 +1,113 @@
+body{
+  background:white;
+  font-family: 'Raleway', sans-serif;
+}
+.main-section{
+	width:80%;
+  margin: auto;
+	text-align: left;
+  padding: 0px 5px;
+  float: left;
+}
+.dashbord{
+background-color:#1F2124;
+box-shadow: 0 0 20px rgba(0,0,0,0.4);
+border-radius: 5px;
+margin: 50px 20px 20px 20px;
+width: calc(45% - 40px);
+padding: 10px;
+text-align: left;
+color: #F6B352;
+float: left;
+}
+
+.detail-section{
+background-color: #1F2124;
+padding: 5px 0px;
+}
+
+.detail-section h1{
+  margin:0px;
+  font-size: 24px;
+  padding-bottom: 10px;
+  }
+
+.detail-section p{
+margin:0px;
+font-size: 20px;
+padding-bottom: 10px;
+}
+
+.dashbord .detail-section:hover{
+background-color: #1F2124;
+cursor: pointer;
+}
+.detail-section a{
+color:#fff;
+text-decoration: none;
+}
+.dashbord-domain {
+
+}
+
+.dashbord-speed {
+
+}
+
+.dashbord-stack {
+
+}
+
+.header{
+  text-align: left;
+  width: 60%;
+  margin: 40px 3%;
+  position: relative; /* necessary to give position: relative to parent. */
+}
+
+input[type="text"]{
+  float: left;
+  font: 15px/24px "Lato", Arial, sans-serif;
+  color: #494949;
+  width: 60%;
+  box-sizing: border-box;
+  letter-spacing: 1px;
+}
+ 
+.urlInput{
+  border: 0;
+  padding: 4px 0;
+  border-bottom: 1px solid #494949;
+  background-color: transparent;
+}
+ 
+.urlInput ~ label{
+  position: absolute;
+  font-size: 12px;
+  left: 0;
+  width: 100%;
+  top: -16px;
+  color: #494949;
+  transition: 0.3s;
+  z-index: -1;
+  letter-spacing: 0.5px;
+}
+
+.startButton {
+  width:20%;
+  color: #494949 !important;
+  text-transform: uppercase;
+  background: #ffffff;
+  padding: 5px;
+  border: 1.5px solid #494949 !important;
+  border-radius: 6px;
+  display: inline-block;
+  transition: all 0.3s ease 0s;
+  }
+
+  .startButton:hover {
+    color: #494949 !important;
+    border-radius: 50px;
+    border-color: #494949 !important;
+    transition: all 0.3s ease 0s;
+    }

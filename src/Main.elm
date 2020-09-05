@@ -3,15 +3,15 @@ module Main exposing (..)
 ----Draggable will be used to check the layout of current and furure elements
 
 import Browser
-import Browser.Events as Events
+import Browser.Events as Events exposing (Visibility(..))
 import Draggable
-import Html exposing (Html, button, div, h1, h2, input, p, text)
+import Html exposing (Html, a, br, button, div, h1, h2, i, input, label, li, option, p, select, small, span, text, ul)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onInput)
 import Http
 import Http.Xml
 import Json.Decode as D
-import Url as U
+import Url as U exposing (Url)
 import Xml.Decode as X
 
 
@@ -25,6 +25,7 @@ type alias Model =
     , drag : Draggable.State String
     , speedDetails : SpeedDetails
     , domainOwnershipDetails : DomainOwnershipDetails
+    , isValid : Bool
     }
 
 
@@ -35,6 +36,7 @@ initialModel =
     , drag = Draggable.init
     , speedDetails = SpeedDetails "0" "0"
     , domainOwnershipDetails = DomainOwnershipDetails "0" "0" "0"
+    , isValid = False
     }
 
 
@@ -53,6 +55,7 @@ type Msg
     | DragMsg (Draggable.Msg String)
     | GotSpeed (Result Http.Error SpeedDetails)
     | GotDomain (Result Http.Error DomainOwnershipDetails)
+    | UrlChange String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -60,6 +63,9 @@ update msg model =
     case msg of
         ClickCheckWebsite ->
             ( model, Cmd.batch [ fetchFromGooglePageSpeedTest, fetchFromWhoIsXML ] )
+
+        UrlChange newUrl ->
+            ( { model | websiteUrl = newUrl, isValid = checkWebsite newUrl }, Cmd.none )
 
         OnDragBy ( dx, dy ) ->
             let
@@ -133,9 +139,9 @@ subscriptions model =
 ---- Functions ----
 
 
-checkWebsite : String -> Cmd Msg
+checkWebsite : String -> Bool
 checkWebsite websiteUrl =
-    Cmd.none
+    not (U.fromString websiteUrl == Nothing)
 
 
 dragConfig : Draggable.Config String Msg
@@ -241,15 +247,39 @@ errorToString error =
 
 view : Model -> Html Msg
 view model =
-    div [ class "container" ]
-        [ input [ placeholder "Name of the Site", class "text-center" ] []
-        , p [ class "text-center" ]
-            [ button [ class "btn btn-success", onClick ClickCheckWebsite ] [ text "Check" ]
+    div [ class "main-section" ]
+        [ div [ class "header" ]
+            [ input [ class "urlInput", placeholder "", type_ "text", value model.websiteUrl, onInput UrlChange ]
+                []
+            , label []
+                [ text "http://" ]
+            , button [ class "startButton", onClick ClickCheckWebsite ]
+                [ text "Check" ]
             ]
-        , div [ class "output" ]
-            [ renderSpeedDetails model.speedDetails ]
-        , div [ class "output" ]
-            [ renderDomainDetails model.domainOwnershipDetails ]
+        , div [ class "dashbord dashbord-domain", hidden (not model.isValid) ]
+            [ div [ class "detail-section" ]
+                [ h1 []
+                    [ text "Speed" ]
+                , p []
+                    [ text "Output" ]
+                ]
+            ]
+        , div [ class "dashbord dashbord-speed" ]
+            [ div [ class "detail-section" ]
+                [ h1 []
+                    [ text "Stack" ]
+                , p []
+                    [ text "Output" ]
+                ]
+            ]
+        , div [ class "dashbord dashbord-stack" ]
+            [ div [ class "detail-section" ]
+                [ h1 []
+                    [ text "Stack" ]
+                , p []
+                    [ text "Output" ]
+                ]
+            ]
         ]
 
 
