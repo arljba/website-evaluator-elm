@@ -1,50 +1,63 @@
 body{
-  background:white;
+  background:#FBFCFF;
   font-family: 'Raleway', sans-serif;
 }
 .main-section{
-	width:80%;
+	width:90%;
   margin: auto;
 	text-align: left;
-  padding: 0px 5px;
-  float: left;
 }
+
 .dashbord{
-background-color:#1F2124;
-box-shadow: 0 0 20px rgba(0,0,0,0.4);
-border-radius: 5px;
-margin: 50px 20px 20px 20px;
-width: calc(45% - 40px);
-padding: 10px;
-text-align: left;
-color: #F6B352;
-float: left;
+background-color:#FBFCFF;
+box-shadow: 0 0 20px rgba(0,0,0,0.1);
+border-radius: 7px;
+margin: 20px 20px 20px 20px;
+width: calc(100% - 40px);
+padding: 5px;
+color: #454444;
 }
 
 .detail-section{
-background-color: #1F2124;
 padding: 5px 0px;
+display: flex;
 }
 
 .detail-section h1{
   margin:0px;
-  font-size: 24px;
-  padding-bottom: 10px;
+  font-size: 18px;
   }
 
 .detail-section p{
 margin:0px;
-font-size: 20px;
-padding-bottom: 10px;
+font-size: 12px;
 }
 
-.dashbord .detail-section:hover{
-background-color: #1F2124;
-cursor: pointer;
-}
 .detail-section a{
 color:#fff;
 text-decoration: none;
+}
+
+.general-info{
+  margin:auto;
+  width:75%;
+}
+.status-info{
+  margin:auto;
+  width:35%;
+}
+
+.status-info h1{
+  display: inline;
+  padding: 5px 25px 5px 25px;
+  font-size: 10px;
+  background-color: #fc704f;
+}
+
+.expand-item{
+  margin:auto;
+  text-align:center;
+  width:15%;
 }
 .dashbord-domain {
 
@@ -110,4 +123,49 @@ input[type="text"]{
     border-radius: 50px;
     border-color: #494949 !important;
     transition: all 0.3s ease 0s;
+    }
+
+    .arrowButton {
+      background-color:white;
+      height: 2.8px;
+      width: 2.8px;
+      display:block;
+      padding: 0.5px;
+      margin: 1px auto;
+      position: relative;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    
+    .leftSide {
+      position: absolute;
+      background-color: #494949;
+      top: 0;
+      left:0;
+      width: 10px;
+      height: 2.5px;
+      display: block;
+      transform: rotate(35deg);
+      float: right;
+      border-radius: 2px;
+    }
+    
+    .rightSide {
+      position: absolute;
+      background-color: #494949;
+      top: 0px;
+      left:6.5px;
+      width: 10px;
+      height: 2.5px;
+      display: block;
+      transform: rotate(-35deg);
+      float: right;
+      border-radius: 2px;
+    
+    }
+
+    .domain-content-section {
+      padding: 0 18px;
+      overflow: hidden;
+      background-color: #f1f1f1;
     }

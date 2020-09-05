@@ -5,7 +5,7 @@ module Main exposing (..)
 import Browser
 import Browser.Events as Events exposing (Visibility(..))
 import Draggable
-import Html exposing (Html, a, br, button, div, h1, h2, i, input, label, li, option, p, select, small, span, text, ul)
+import Html exposing (Html, a, br, button, div, h1, h2, hr, i, input, label, li, option, p, select, small, span, text, ul)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
@@ -26,6 +26,7 @@ type alias Model =
     , speedDetails : SpeedDetails
     , domainOwnershipDetails : DomainOwnershipDetails
     , isValid : Bool
+    , showDomainDetails : Bool
     }
 
 
@@ -37,6 +38,7 @@ initialModel =
     , speedDetails = SpeedDetails "0" "0"
     , domainOwnershipDetails = DomainOwnershipDetails "0" "0" "0"
     , isValid = False
+    , showDomainDetails = True
     }
 
 
@@ -56,6 +58,7 @@ type Msg
     | GotSpeed (Result Http.Error SpeedDetails)
     | GotDomain (Result Http.Error DomainOwnershipDetails)
     | UrlChange String
+    | ExpandDomainContent
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -63,6 +66,9 @@ update msg model =
     case msg of
         ClickCheckWebsite ->
             ( model, Cmd.batch [ fetchFromGooglePageSpeedTest, fetchFromWhoIsXML ] )
+
+        ExpandDomainContent ->
+            ( { model | showDomainDetails = not model.showDomainDetails }, Cmd.none )
 
         UrlChange newUrl ->
             ( { model | websiteUrl = newUrl, isValid = checkWebsite newUrl }, Cmd.none )
@@ -195,6 +201,20 @@ wixDecoder =
         (X.path [ "registrant", "country" ] (X.single X.string))
 
 
+empty : Html msg
+empty =
+    Html.text ""
+
+
+renderIf : Bool -> Html msg -> Html msg
+renderIf shouldRender elem =
+    if shouldRender then
+        elem
+
+    else
+        empty
+
+
 
 --- For some reason "d.at" doent work with D.at maybe look at it later
 
@@ -256,30 +276,79 @@ view model =
             , button [ class "startButton", onClick ClickCheckWebsite ]
                 [ text "Check" ]
             ]
-        , div [ class "dashbord dashbord-domain", hidden (not model.isValid) ]
+        , div [ class "dashbord dashbord-domain" ]
             [ div [ class "detail-section" ]
-                [ h1 []
-                    [ text "Speed" ]
-                , p []
-                    [ text "Output" ]
+                [ div [ class "general-info" ]
+                    [ h1 []
+                        [ text "Domain" ]
+                    ]
+                , div [ class "status-info" ]
+                    [ h1 []
+                        [ text "Status" ]
+                    ]
+                , div [ class "expand-item" ]
+                    [ a [ class "arrowButton", onClick ExpandDomainContent ]
+                        [ span [ class "leftSide" ]
+                            []
+                        , span [ class "rightSide" ]
+                            []
+                        ]
+                    ]
                 ]
+            , viewExpandDomain model |> renderIf model.showDomainDetails
             ]
         , div [ class "dashbord dashbord-speed" ]
             [ div [ class "detail-section" ]
-                [ h1 []
-                    [ text "Stack" ]
-                , p []
-                    [ text "Output" ]
+                [ div [ class "general-info" ]
+                    [ h1 []
+                        [ text "Speed" ]
+                    ]
+                , div [ class "status-info" ]
+                    [ h1 []
+                        [ text "Status" ]
+                    ]
+                , div [ class "expand-item" ]
+                    [ a [ class "arrowButton" ]
+                        [ span [ class "leftSide" ]
+                            []
+                        , span [ class "rightSide" ]
+                            []
+                        ]
+                    ]
                 ]
             ]
         , div [ class "dashbord dashbord-stack" ]
             [ div [ class "detail-section" ]
-                [ h1 []
-                    [ text "Stack" ]
-                , p []
-                    [ text "Output" ]
+                [ div [ class "general-info" ]
+                    [ h1 []
+                        [ text "Stack" ]
+                    ]
+                , div [ class "status-info" ]
+                    [ h1 []
+                        [ text "Status" ]
+                    ]
+                , div [ class "expand-item" ]
+                    [ a [ class "arrowButton" ]
+                        [ span [ class "leftSide" ]
+                            []
+                        , span [ class "rightSide" ]
+                            []
+                        ]
+                    ]
                 ]
             ]
+        ]
+
+
+viewExpandDomain : Model -> Html Msg
+viewExpandDomain model =
+    div [ class "domain-content-section" ]
+        [ p []
+            [ text "Organization: " ]
+        , p []
+            [ text "State: " ]
+        , p []
+            [ text "Country: " ]
         ]
 
 

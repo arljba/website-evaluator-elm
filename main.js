@@ -5504,6 +5504,7 @@ var $author$project$Main$initialModel = {
 	drag: $zaboco$elm_draggable$Draggable$init,
 	isValid: false,
 	position: _Utils_Tuple2(0, 0),
+	showDomainDetails: true,
 	speedDetails: A2($author$project$Main$SpeedDetails, '0', '0'),
 	websiteUrl: ''
 };
@@ -9001,6 +9002,12 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$batch(
 						_List_fromArray(
 							[$author$project$Main$fetchFromGooglePageSpeedTest, $author$project$Main$fetchFromWhoIsXML])));
+			case 'ExpandDomainContent':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{showDomainDetails: !model.showDomainDetails}),
+					$elm$core$Platform$Cmd$none);
 			case 'UrlChange':
 				var newUrl = msg.a;
 				return _Utils_Tuple2(
@@ -9077,9 +9084,11 @@ var $author$project$Main$update = F2(
 		}
 	});
 var $author$project$Main$ClickCheckWebsite = {$: 'ClickCheckWebsite'};
+var $author$project$Main$ExpandDomainContent = {$: 'ExpandDomainContent'};
 var $author$project$Main$UrlChange = function (a) {
 	return {$: 'UrlChange', a: a};
 };
+var $elm$html$Html$a = _VirtualDom_node('a');
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
@@ -9092,15 +9101,6 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $elm$html$Html$Attributes$boolProperty = F2(
-	function (key, bool) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$bool(bool));
-	});
-var $elm$html$Html$Attributes$hidden = $elm$html$Html$Attributes$boolProperty('hidden');
 var $elm$html$Html$input = _VirtualDom_node('input');
 var $elm$html$Html$label = _VirtualDom_node('label');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
@@ -9151,12 +9151,50 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			$elm$html$Html$Events$alwaysStop,
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
 };
-var $elm$html$Html$p = _VirtualDom_node('p');
 var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $author$project$Main$empty = $elm$html$Html$text('');
+var $author$project$Main$renderIf = F2(
+	function (shouldRender, elem) {
+		return shouldRender ? elem : $author$project$Main$empty;
+	});
+var $elm$html$Html$span = _VirtualDom_node('span');
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $elm$html$Html$p = _VirtualDom_node('p');
+var $author$project$Main$viewExpandDomain = function (model) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('domain-content-section')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Organization: ')
+					])),
+				A2(
+				$elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('State: ')
+					])),
+				A2(
+				$elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Country: ')
+					]))
+			]));
+};
 var $author$project$Main$view = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -9208,8 +9246,7 @@ var $author$project$Main$view = function (model) {
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('dashbord dashbord-domain'),
-						$elm$html$Html$Attributes$hidden(!model.isValid)
+						$elm$html$Html$Attributes$class('dashbord dashbord-domain')
 					]),
 				_List_fromArray(
 					[
@@ -9222,20 +9259,75 @@ var $author$project$Main$view = function (model) {
 						_List_fromArray(
 							[
 								A2(
-								$elm$html$Html$h1,
-								_List_Nil,
+								$elm$html$Html$div,
 								_List_fromArray(
 									[
-										$elm$html$Html$text('Speed')
+										$elm$html$Html$Attributes$class('general-info')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$h1,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$elm$html$Html$text('Domain')
+											]))
 									])),
 								A2(
-								$elm$html$Html$p,
-								_List_Nil,
+								$elm$html$Html$div,
 								_List_fromArray(
 									[
-										$elm$html$Html$text('Output')
+										$elm$html$Html$Attributes$class('status-info')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$h1,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$elm$html$Html$text('Status')
+											]))
+									])),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('expand-item')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$a,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('arrowButton'),
+												$elm$html$Html$Events$onClick($author$project$Main$ExpandDomainContent)
+											]),
+										_List_fromArray(
+											[
+												A2(
+												$elm$html$Html$span,
+												_List_fromArray(
+													[
+														$elm$html$Html$Attributes$class('leftSide')
+													]),
+												_List_Nil),
+												A2(
+												$elm$html$Html$span,
+												_List_fromArray(
+													[
+														$elm$html$Html$Attributes$class('rightSide')
+													]),
+												_List_Nil)
+											]))
 									]))
-							]))
+							])),
+						A2(
+						$author$project$Main$renderIf,
+						model.showDomainDetails,
+						$author$project$Main$viewExpandDomain(model))
 					])),
 				A2(
 				$elm$html$Html$div,
@@ -9254,18 +9346,68 @@ var $author$project$Main$view = function (model) {
 						_List_fromArray(
 							[
 								A2(
-								$elm$html$Html$h1,
-								_List_Nil,
+								$elm$html$Html$div,
 								_List_fromArray(
 									[
-										$elm$html$Html$text('Stack')
+										$elm$html$Html$Attributes$class('general-info')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$h1,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$elm$html$Html$text('Speed')
+											]))
 									])),
 								A2(
-								$elm$html$Html$p,
-								_List_Nil,
+								$elm$html$Html$div,
 								_List_fromArray(
 									[
-										$elm$html$Html$text('Output')
+										$elm$html$Html$Attributes$class('status-info')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$h1,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$elm$html$Html$text('Status')
+											]))
+									])),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('expand-item')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$a,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('arrowButton')
+											]),
+										_List_fromArray(
+											[
+												A2(
+												$elm$html$Html$span,
+												_List_fromArray(
+													[
+														$elm$html$Html$Attributes$class('leftSide')
+													]),
+												_List_Nil),
+												A2(
+												$elm$html$Html$span,
+												_List_fromArray(
+													[
+														$elm$html$Html$Attributes$class('rightSide')
+													]),
+												_List_Nil)
+											]))
 									]))
 							]))
 					])),
@@ -9286,18 +9428,68 @@ var $author$project$Main$view = function (model) {
 						_List_fromArray(
 							[
 								A2(
-								$elm$html$Html$h1,
-								_List_Nil,
+								$elm$html$Html$div,
 								_List_fromArray(
 									[
-										$elm$html$Html$text('Stack')
+										$elm$html$Html$Attributes$class('general-info')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$h1,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$elm$html$Html$text('Stack')
+											]))
 									])),
 								A2(
-								$elm$html$Html$p,
-								_List_Nil,
+								$elm$html$Html$div,
 								_List_fromArray(
 									[
-										$elm$html$Html$text('Output')
+										$elm$html$Html$Attributes$class('status-info')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$h1,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$elm$html$Html$text('Status')
+											]))
+									])),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('expand-item')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$a,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('arrowButton')
+											]),
+										_List_fromArray(
+											[
+												A2(
+												$elm$html$Html$span,
+												_List_fromArray(
+													[
+														$elm$html$Html$Attributes$class('leftSide')
+													]),
+												_List_Nil),
+												A2(
+												$elm$html$Html$span,
+												_List_fromArray(
+													[
+														$elm$html$Html$Attributes$class('rightSide')
+													]),
+												_List_Nil)
+											]))
 									]))
 							]))
 					]))
