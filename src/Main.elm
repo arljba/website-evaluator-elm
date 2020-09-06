@@ -7,7 +7,7 @@ import Browser.Events as Events exposing (Visibility(..))
 import Draggable
 import Html exposing (Html, a, br, button, div, h1, h2, hr, i, input, label, li, option, p, select, small, span, text, ul)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Html.Events exposing (onCheck, onClick, onInput)
 import Http
 import Http.Xml
 import Json.Decode as D
@@ -27,6 +27,9 @@ type alias Model =
     , domainOwnershipDetails : DomainOwnershipDetails
     , isValid : Bool
     , showDomainDetails : Bool
+    , domainSelected : Bool
+    , speedSelected : Bool
+    , stackSelected : Bool
     }
 
 
@@ -35,10 +38,13 @@ initialModel =
     { websiteUrl = ""
     , position = ( 0, 0 )
     , drag = Draggable.init
-    , speedDetails = SpeedDetails "0" "0"
-    , domainOwnershipDetails = DomainOwnershipDetails "0" "0" "0"
+    , speedDetails = SpeedDetails "" ""
+    , domainOwnershipDetails = DomainOwnershipDetails "" "" ""
     , isValid = False
-    , showDomainDetails = True
+    , showDomainDetails = False
+    , domainSelected = False
+    , speedSelected = False
+    , stackSelected = False
     }
 
 
@@ -59,19 +65,31 @@ type Msg
     | GotDomain (Result Http.Error DomainOwnershipDetails)
     | UrlChange String
     | ExpandDomainContent
+    | ApiSelectionChange Target Bool
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ClickCheckWebsite ->
-            ( model, Cmd.batch [ fetchFromGooglePageSpeedTest, fetchFromWhoIsXML ] )
+            ( model, Cmd.batch [ fetchFromWhoIsXML model model.websiteUrl, fetchFromGooglePageSpeedTest model model.websiteUrl ] )
 
         ExpandDomainContent ->
             ( { model | showDomainDetails = not model.showDomainDetails }, Cmd.none )
 
         UrlChange newUrl ->
             ( { model | websiteUrl = newUrl, isValid = checkWebsite newUrl }, Cmd.none )
+
+        ApiSelectionChange target bool ->
+            case target of
+                TargetDomain ->
+                    ( { model | domainSelected = not model.domainSelected }, Cmd.none )
+
+                TargetSpeed ->
+                    ( { model | speedSelected = not model.speedSelected }, Cmd.none )
+
+                TargetStack ->
+                    ( { model | stackSelected = not model.stackSelected }, Cmd.none )
 
         OnDragBy ( dx, dy ) ->
             let
@@ -104,21 +122,6 @@ update msg model =
 ---- Custom Types ----
 
 
-type alias User =
-    { id : Int
-    , email : String
-    }
-
-
-json =
-    """
-{
-  "id" : 1,
-  "email" : "arne-baumann@gmail.com"
-}
-"""
-
-
 type alias SpeedDetails =
     { timeToInteractive : String
     , firstContentfulPaint : String
@@ -130,6 +133,12 @@ type alias DomainOwnershipDetails =
     , state : String
     , country : String
     }
+
+
+type Target
+    = TargetDomain
+    | TargetSpeed
+    | TargetStack
 
 
 
@@ -153,25 +162,6 @@ checkWebsite websiteUrl =
 dragConfig : Draggable.Config String Msg
 dragConfig =
     Draggable.basicConfig OnDragBy
-
-
-testDecoder : D.Decoder User
-testDecoder =
-    D.map2 User
-        (D.field "id" D.int)
-        (D.field "email" D.string)
-
-
-decoderToString : String -> Html Msg
-decoderToString string =
-    case string |> D.decodeString testDecoder of
-        Ok user ->
-            div [ class "output" ]
-                [ text user.email ]
-
-        Err err ->
-            div [ class "output" ]
-                [ text "Error" ]
 
 
 renderSpeedDetails : SpeedDetails -> Html Msg
@@ -215,24 +205,37 @@ renderIf shouldRender elem =
         empty
 
 
+removeFromList : Int -> List a -> List a
+removeFromList i xs =
+    List.take i xs ++ List.drop (i + 1) xs
+
+
 
 --- For some reason "d.at" doent work with D.at maybe look at it later
 
 
-fetchFromGooglePageSpeedTest : Cmd Msg
-fetchFromGooglePageSpeedTest =
-    Http.get
-        { url = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=https://hs-flensburg.de&&key=AIzaSyBfcmkhsGWVmLlVYn0YkTk6dDZFrcbbXV4&&category=PERFORMANCE&&strategy=DESKTOP"
-        , expect = Http.expectJson GotSpeed gpstDecoder
-        }
+fetchFromGooglePageSpeedTest : Model -> String -> Cmd Msg
+fetchFromGooglePageSpeedTest model websiteUrl =
+    if model.speedSelected then
+        Http.get
+            { url = String.concat [ "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=", websiteUrl, "&key=AIzaSyBfcmkhsGWVmLlVYn0YkTk6dDZFrcbbXV4&category=PERFORMANCE&strategy=DESKTOP" ]
+            , expect = Http.expectJson GotSpeed gpstDecoder
+            }
+
+    else
+        Cmd.none
 
 
-fetchFromWhoIsXML : Cmd Msg
-fetchFromWhoIsXML =
-    Http.get
-        { url = "https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_XRwFO1KDNvYMqdy0QfkAGpMhB7i58&domainName=google.com"
-        , expect = Http.Xml.expectXml GotDomain wixDecoder
-        }
+fetchFromWhoIsXML : Model -> String -> Cmd Msg
+fetchFromWhoIsXML model websiteUrl =
+    if model.domainSelected then
+        Http.get
+            { url = String.concat [ "https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_XRwFO1KDNvYMqdy0QfkAGpMhB7i58&domainName=", websiteUrl ]
+            , expect = Http.Xml.expectXml GotDomain wixDecoder
+            }
+
+    else
+        Cmd.none
 
 
 errorToString : Http.Error -> String
@@ -275,68 +278,44 @@ view model =
                 [ text "http://" ]
             , button [ class "startButton", onClick ClickCheckWebsite ]
                 [ text "Check" ]
+            , viewSelection model
             ]
-        , div [ class "dashbord dashbord-domain" ]
-            [ div [ class "detail-section" ]
-                [ div [ class "general-info" ]
-                    [ h1 []
-                        [ text "Domain" ]
-                    ]
-                , div [ class "status-info" ]
-                    [ h1 []
-                        [ text "Status" ]
-                    ]
-                , div [ class "expand-item" ]
-                    [ a [ class "arrowButton", onClick ExpandDomainContent ]
-                        [ span [ class "leftSide" ]
-                            []
-                        , span [ class "rightSide" ]
-                            []
-                        ]
+        , viewDomain model
+        , viewSpeed model
+        , viewStack model
+        ]
+
+
+viewDomain : Model -> Html Msg
+viewDomain model =
+    div [ class "dashbord dashbord-domain" ]
+        [ div [ class "detail-section" ]
+            [ div [ class "general-info" ]
+                [ h1 []
+                    [ text "Domain" ]
+                ]
+            , div [ class "activate" ]
+                [ label [ class "switch" ]
+                    [ input [ type_ "checkbox", checked model.domainSelected, onCheck (ApiSelectionChange TargetDomain) ]
+                        []
+                    , span [ class "slider round" ]
+                        []
                     ]
                 ]
-            , viewExpandDomain model |> renderIf model.showDomainDetails
-            ]
-        , div [ class "dashbord dashbord-speed" ]
-            [ div [ class "detail-section" ]
-                [ div [ class "general-info" ]
-                    [ h1 []
-                        [ text "Speed" ]
-                    ]
-                , div [ class "status-info" ]
-                    [ h1 []
-                        [ text "Status" ]
-                    ]
-                , div [ class "expand-item" ]
-                    [ a [ class "arrowButton" ]
-                        [ span [ class "leftSide" ]
-                            []
-                        , span [ class "rightSide" ]
-                            []
-                        ]
+            , div [ class "status-info" ]
+                [ h1 []
+                    [ text "Status" ]
+                ]
+            , div [ class "expand-item" ]
+                [ a [ class "arrowButton", onClick ExpandDomainContent ]
+                    [ span [ class "leftSide" ]
+                        []
+                    , span [ class "rightSide" ]
+                        []
                     ]
                 ]
             ]
-        , div [ class "dashbord dashbord-stack" ]
-            [ div [ class "detail-section" ]
-                [ div [ class "general-info" ]
-                    [ h1 []
-                        [ text "Stack" ]
-                    ]
-                , div [ class "status-info" ]
-                    [ h1 []
-                        [ text "Status" ]
-                    ]
-                , div [ class "expand-item" ]
-                    [ a [ class "arrowButton" ]
-                        [ span [ class "leftSide" ]
-                            []
-                        , span [ class "rightSide" ]
-                            []
-                        ]
-                    ]
-                ]
-            ]
+        , viewExpandDomain model |> renderIf model.showDomainDetails
         ]
 
 
@@ -344,12 +323,82 @@ viewExpandDomain : Model -> Html Msg
 viewExpandDomain model =
     div [ class "domain-content-section" ]
         [ p []
-            [ text "Organization: " ]
+            [ text (String.concat [ "Organization: ", model.domainOwnershipDetails.organization ]) ]
         , p []
-            [ text "State: " ]
+            [ text (String.concat [ "State: ", model.domainOwnershipDetails.state ]) ]
         , p []
-            [ text "Country: " ]
+            [ text (String.concat [ "Country: ", model.domainOwnershipDetails.country ]) ]
         ]
+
+
+viewSpeed : Model -> Html Msg
+viewSpeed model =
+    div [ class "dashbord dashbord-speed" ]
+        [ div [ class "detail-section" ]
+            [ div [ class "general-info" ]
+                [ h1 []
+                    [ text "Speed" ]
+                ]
+            , div [ class "activate" ]
+                [ label [ class "switch" ]
+                    [ input [ type_ "checkbox", checked model.speedSelected, onCheck (ApiSelectionChange TargetSpeed) ]
+                        []
+                    , span [ class "slider round" ]
+                        []
+                    ]
+                ]
+            , div [ class "status-info" ]
+                [ h1 []
+                    [ text "Status" ]
+                ]
+            , div [ class "expand-item" ]
+                [ a [ class "arrowButton" ]
+                    [ span [ class "leftSide" ]
+                        []
+                    , span [ class "rightSide" ]
+                        []
+                    ]
+                ]
+            ]
+        ]
+
+
+viewStack : Model -> Html Msg
+viewStack model =
+    div [ class "dashbord dashbord-stack" ]
+        [ div [ class "detail-section" ]
+            [ div [ class "general-info" ]
+                [ h1 []
+                    [ text "Stack" ]
+                ]
+            , div [ class "activate" ]
+                [ label [ class "switch" ]
+                    [ input [ type_ "checkbox", checked model.stackSelected, onCheck (ApiSelectionChange TargetStack) ]
+                        []
+                    , span [ class "slider round" ]
+                        []
+                    ]
+                ]
+            , div [ class "status-info" ]
+                [ h1 []
+                    [ text "Status" ]
+                ]
+            , div [ class "expand-item" ]
+                [ a [ class "arrowButton" ]
+                    [ span [ class "leftSide" ]
+                        []
+                    , span [ class "rightSide" ]
+                        []
+                    ]
+                ]
+            ]
+        ]
+
+
+viewSelection : Model -> Html Msg
+viewSelection model =
+    div [ class "selection-section" ]
+        []
 
 
 
