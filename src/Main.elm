@@ -27,9 +27,10 @@ type alias Model =
     , domainOwnershipDetails : DomainOwnershipDetails
     , isValid : Bool
     , showDomainDetails : Bool
-    , domainSelected : Bool
-    , speedSelected : Bool
-    , stackSelected : Bool
+    , apiSelection : ApiSelection
+    , domainStatus : String
+    , speedStatus : String
+    , stackStatus : String
     }
 
 
@@ -42,9 +43,10 @@ initialModel =
     , domainOwnershipDetails = DomainOwnershipDetails "" "" ""
     , isValid = False
     , showDomainDetails = False
-    , domainSelected = False
-    , speedSelected = False
-    , stackSelected = False
+    , apiSelection = ApiSelection False False False False False
+    , domainStatus = "Status"
+    , speedStatus = ""
+    , stackStatus = ""
     }
 
 
@@ -83,13 +85,19 @@ update msg model =
         ApiSelectionChange target bool ->
             case target of
                 TargetDomain ->
-                    ( { model | domainSelected = not model.domainSelected }, Cmd.none )
+                    ( { model | apiSelection = toggleDomainSelected model.apiSelection }, Cmd.none )
 
                 TargetSpeed ->
-                    ( { model | speedSelected = not model.speedSelected }, Cmd.none )
+                    ( { model | apiSelection = toggleSpeedSelected model.apiSelection }, Cmd.none )
 
                 TargetStack ->
-                    ( { model | stackSelected = not model.stackSelected }, Cmd.none )
+                    ( { model | apiSelection = toggleStackSelected model.apiSelection }, Cmd.none )
+
+                TargetLink ->
+                    ( { model | apiSelection = toggleLinkSelected model.apiSelection }, Cmd.none )
+
+                TargetStruct ->
+                    ( { model | apiSelection = toggleStructSelected model.apiSelection }, Cmd.none )
 
         OnDragBy ( dx, dy ) ->
             let
@@ -101,18 +109,18 @@ update msg model =
         GotSpeed result ->
             case result of
                 Ok details ->
-                    ( { model | websiteUrl = "Sucess", speedDetails = SpeedDetails details.timeToInteractive details.firstContentfulPaint }, Cmd.none )
+                    ( { model | speedStatus = "Sucess", speedDetails = SpeedDetails details.timeToInteractive details.firstContentfulPaint }, Cmd.none )
 
                 Err err ->
-                    ( { model | websiteUrl = errorToString err }, Cmd.none )
+                    ( { model | speedStatus = errorToString err }, Cmd.none )
 
         GotDomain result ->
             case result of
                 Ok details ->
-                    ( { model | websiteUrl = "Sucess", domainOwnershipDetails = DomainOwnershipDetails details.organization details.state details.country }, Cmd.none )
+                    ( { model | domainStatus = "Sucess", domainOwnershipDetails = DomainOwnershipDetails details.organization details.state details.country }, Cmd.none )
 
                 Err err ->
-                    ( { model | websiteUrl = errorToString err }, Cmd.none )
+                    ( { model | domainStatus = errorToString err }, Cmd.none )
 
         DragMsg dragMsg ->
             Draggable.update dragConfig dragMsg model
@@ -139,6 +147,42 @@ type Target
     = TargetDomain
     | TargetSpeed
     | TargetStack
+    | TargetLink
+    | TargetStruct
+
+
+type alias ApiSelection =
+    { domainSelected : Bool
+    , speedSelected : Bool
+    , stackSelected : Bool
+    , linkSelected : Bool
+    , structureSelected : Bool
+    }
+
+
+toggleDomainSelected : ApiSelection -> ApiSelection
+toggleDomainSelected selection =
+    { selection | domainSelected = not selection.domainSelected }
+
+
+toggleSpeedSelected : ApiSelection -> ApiSelection
+toggleSpeedSelected selection =
+    { selection | speedSelected = not selection.speedSelected }
+
+
+toggleStackSelected : ApiSelection -> ApiSelection
+toggleStackSelected selection =
+    { selection | stackSelected = not selection.stackSelected }
+
+
+toggleLinkSelected : ApiSelection -> ApiSelection
+toggleLinkSelected selection =
+    { selection | linkSelected = not selection.linkSelected }
+
+
+toggleStructSelected : ApiSelection -> ApiSelection
+toggleStructSelected selection =
+    { selection | structureSelected = not selection.structureSelected }
 
 
 
@@ -216,7 +260,7 @@ removeFromList i xs =
 
 fetchFromGooglePageSpeedTest : Model -> String -> Cmd Msg
 fetchFromGooglePageSpeedTest model websiteUrl =
-    if model.speedSelected then
+    if model.apiSelection.speedSelected then
         Http.get
             { url = String.concat [ "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=", websiteUrl, "&key=AIzaSyBfcmkhsGWVmLlVYn0YkTk6dDZFrcbbXV4&category=PERFORMANCE&strategy=DESKTOP" ]
             , expect = Http.expectJson GotSpeed gpstDecoder
@@ -228,7 +272,7 @@ fetchFromGooglePageSpeedTest model websiteUrl =
 
 fetchFromWhoIsXML : Model -> String -> Cmd Msg
 fetchFromWhoIsXML model websiteUrl =
-    if model.domainSelected then
+    if model.apiSelection.domainSelected then
         Http.get
             { url = String.concat [ "https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_XRwFO1KDNvYMqdy0QfkAGpMhB7i58&domainName=", websiteUrl ]
             , expect = Http.Xml.expectXml GotDomain wixDecoder
@@ -280,9 +324,12 @@ view model =
                 [ text "Check" ]
             , viewSelection model
             ]
+        , viewInfo model
         , viewDomain model
         , viewSpeed model
         , viewStack model
+        , viewLink model
+        , viewStructure model
         ]
 
 
@@ -296,7 +343,7 @@ viewDomain model =
                 ]
             , div [ class "activate" ]
                 [ label [ class "switch" ]
-                    [ input [ type_ "checkbox", checked model.domainSelected, onCheck (ApiSelectionChange TargetDomain) ]
+                    [ input [ type_ "checkbox", checked model.apiSelection.domainSelected, onCheck (ApiSelectionChange TargetDomain) ]
                         []
                     , span [ class "slider round" ]
                         []
@@ -304,7 +351,7 @@ viewDomain model =
                 ]
             , div [ class "status-info" ]
                 [ h1 []
-                    [ text "Status" ]
+                    [ text model.domainStatus ]
                 ]
             , div [ class "expand-item" ]
                 [ a [ class "arrowButton", onClick ExpandDomainContent ]
@@ -341,7 +388,7 @@ viewSpeed model =
                 ]
             , div [ class "activate" ]
                 [ label [ class "switch" ]
-                    [ input [ type_ "checkbox", checked model.speedSelected, onCheck (ApiSelectionChange TargetSpeed) ]
+                    [ input [ type_ "checkbox", checked model.apiSelection.speedSelected, onCheck (ApiSelectionChange TargetSpeed) ]
                         []
                     , span [ class "slider round" ]
                         []
@@ -373,7 +420,95 @@ viewStack model =
                 ]
             , div [ class "activate" ]
                 [ label [ class "switch" ]
-                    [ input [ type_ "checkbox", checked model.stackSelected, onCheck (ApiSelectionChange TargetStack) ]
+                    [ input [ type_ "checkbox", checked model.apiSelection.stackSelected, onCheck (ApiSelectionChange TargetStack) ]
+                        []
+                    , span [ class "slider round" ]
+                        []
+                    ]
+                ]
+            , div [ class "status-info" ]
+                [ h1 []
+                    [ text "Status" ]
+                ]
+            , div [ class "expand-item" ]
+                [ a [ class "arrowButton" ]
+                    [ span [ class "leftSide" ]
+                        []
+                    , span [ class "rightSide" ]
+                        []
+                    ]
+                ]
+            ]
+        ]
+
+
+viewInfo : Model -> Html Msg
+viewInfo model =
+    div [ class "dashbord dashbord-info" ]
+        [ div [ class "detail-section" ]
+            [ div [ class "head-general-info" ]
+                [ h1 []
+                    [ text "API" ]
+                ]
+            , div [ class "head-activate" ]
+                [ h1 []
+                    [ text "Active" ]
+                ]
+            , div [ class "head-status-info" ]
+                [ h1 []
+                    [ text "Status" ]
+                ]
+            , div [ class "head-expand-item" ]
+                [ h1 []
+                    [ text "Details" ]
+                ]
+            ]
+        ]
+
+
+viewLink : Model -> Html Msg
+viewLink model =
+    div [ class "dashbord dashbord-speed" ]
+        [ div [ class "detail-section" ]
+            [ div [ class "general-info" ]
+                [ h1 []
+                    [ text "Link" ]
+                ]
+            , div [ class "activate" ]
+                [ label [ class "switch" ]
+                    [ input [ type_ "checkbox", checked model.apiSelection.linkSelected, onCheck (ApiSelectionChange TargetLink) ]
+                        []
+                    , span [ class "slider round" ]
+                        []
+                    ]
+                ]
+            , div [ class "status-info" ]
+                [ h1 []
+                    [ text "Status" ]
+                ]
+            , div [ class "expand-item" ]
+                [ a [ class "arrowButton" ]
+                    [ span [ class "leftSide" ]
+                        []
+                    , span [ class "rightSide" ]
+                        []
+                    ]
+                ]
+            ]
+        ]
+
+
+viewStructure : Model -> Html Msg
+viewStructure model =
+    div [ class "dashbord dashbord-speed" ]
+        [ div [ class "detail-section" ]
+            [ div [ class "general-info" ]
+                [ h1 []
+                    [ text "Structure" ]
+                ]
+            , div [ class "activate" ]
+                [ label [ class "switch" ]
+                    [ input [ type_ "checkbox", checked model.apiSelection.structureSelected, onCheck (ApiSelectionChange TargetStruct) ]
                         []
                     , span [ class "slider round" ]
                         []

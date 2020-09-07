@@ -5486,6 +5486,10 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
+var $author$project$Main$ApiSelection = F5(
+	function (domainSelected, speedSelected, stackSelected, linkSelected, structureSelected) {
+		return {domainSelected: domainSelected, linkSelected: linkSelected, speedSelected: speedSelected, stackSelected: stackSelected, structureSelected: structureSelected};
+	});
 var $author$project$Main$DomainOwnershipDetails = F3(
 	function (organization, state, country) {
 		return {country: country, organization: organization, state: state};
@@ -5500,15 +5504,16 @@ var $zaboco$elm_draggable$Draggable$State = function (a) {
 };
 var $zaboco$elm_draggable$Draggable$init = $zaboco$elm_draggable$Draggable$State($zaboco$elm_draggable$Internal$NotDragging);
 var $author$project$Main$initialModel = {
+	apiSelection: A5($author$project$Main$ApiSelection, false, false, false, false, false),
 	domainOwnershipDetails: A3($author$project$Main$DomainOwnershipDetails, '', '', ''),
-	domainSelected: false,
+	domainStatus: 'Status',
 	drag: $zaboco$elm_draggable$Draggable$init,
 	isValid: false,
 	position: _Utils_Tuple2(0, 0),
 	showDomainDetails: false,
 	speedDetails: A2($author$project$Main$SpeedDetails, '', ''),
-	speedSelected: false,
-	stackSelected: false,
+	speedStatus: '',
+	stackStatus: '',
 	websiteUrl: ''
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
@@ -6724,7 +6729,7 @@ var $author$project$Main$gpstDecoder = A3(
 				A2($elm$json$Json$Decode$field, 'displayValue', $elm$json$Json$Decode$string)))));
 var $author$project$Main$fetchFromGooglePageSpeedTest = F2(
 	function (model, websiteUrl) {
-		return model.speedSelected ? $elm$http$Http$get(
+		return model.apiSelection.speedSelected ? $elm$http$Http$get(
 			{
 				expect: A2($elm$http$Http$expectJson, $author$project$Main$GotSpeed, $author$project$Main$gpstDecoder),
 				url: $elm$core$String$concat(
@@ -8898,7 +8903,7 @@ var $author$project$Main$wixDecoder = A4(
 		$ymtszw$elm_xml_decode$Xml$Decode$single($ymtszw$elm_xml_decode$Xml$Decode$string)));
 var $author$project$Main$fetchFromWhoIsXML = F2(
 	function (model, websiteUrl) {
-		return model.domainSelected ? $elm$http$Http$get(
+		return model.apiSelection.domainSelected ? $elm$http$Http$get(
 			{
 				expect: A2($ymtszw$elm_http_xml$Http$Xml$expectXml, $author$project$Main$GotDomain, $author$project$Main$wixDecoder),
 				url: $elm$core$String$concat(
@@ -8907,6 +8912,31 @@ var $author$project$Main$fetchFromWhoIsXML = F2(
 			}) : $elm$core$Platform$Cmd$none;
 	});
 var $elm$core$Basics$round = _Basics_round;
+var $author$project$Main$toggleDomainSelected = function (selection) {
+	return _Utils_update(
+		selection,
+		{domainSelected: !selection.domainSelected});
+};
+var $author$project$Main$toggleLinkSelected = function (selection) {
+	return _Utils_update(
+		selection,
+		{linkSelected: !selection.linkSelected});
+};
+var $author$project$Main$toggleSpeedSelected = function (selection) {
+	return _Utils_update(
+		selection,
+		{speedSelected: !selection.speedSelected});
+};
+var $author$project$Main$toggleStackSelected = function (selection) {
+	return _Utils_update(
+		selection,
+		{stackSelected: !selection.stackSelected});
+};
+var $author$project$Main$toggleStructSelected = function (selection) {
+	return _Utils_update(
+		selection,
+		{structureSelected: !selection.structureSelected});
+};
 var $zaboco$elm_draggable$Cmd$Extra$message = function (x) {
 	return A2(
 		$elm$core$Task$perform,
@@ -9045,19 +9075,41 @@ var $author$project$Main$update = F2(
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
-								{domainSelected: !model.domainSelected}),
+								{
+									apiSelection: $author$project$Main$toggleDomainSelected(model.apiSelection)
+								}),
 							$elm$core$Platform$Cmd$none);
 					case 'TargetSpeed':
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
-								{speedSelected: !model.speedSelected}),
+								{
+									apiSelection: $author$project$Main$toggleSpeedSelected(model.apiSelection)
+								}),
+							$elm$core$Platform$Cmd$none);
+					case 'TargetStack':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									apiSelection: $author$project$Main$toggleStackSelected(model.apiSelection)
+								}),
+							$elm$core$Platform$Cmd$none);
+					case 'TargetLink':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									apiSelection: $author$project$Main$toggleLinkSelected(model.apiSelection)
+								}),
 							$elm$core$Platform$Cmd$none);
 					default:
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
-								{stackSelected: !model.stackSelected}),
+								{
+									apiSelection: $author$project$Main$toggleStructSelected(model.apiSelection)
+								}),
 							$elm$core$Platform$Cmd$none);
 				}
 			case 'OnDragBy':
@@ -9085,7 +9137,7 @@ var $author$project$Main$update = F2(
 							model,
 							{
 								speedDetails: A2($author$project$Main$SpeedDetails, details.timeToInteractive, details.firstContentfulPaint),
-								websiteUrl: 'Sucess'
+								speedStatus: 'Sucess'
 							}),
 						$elm$core$Platform$Cmd$none);
 				} else {
@@ -9094,7 +9146,7 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								websiteUrl: $author$project$Main$errorToString(err)
+								speedStatus: $author$project$Main$errorToString(err)
 							}),
 						$elm$core$Platform$Cmd$none);
 				}
@@ -9107,7 +9159,7 @@ var $author$project$Main$update = F2(
 							model,
 							{
 								domainOwnershipDetails: A3($author$project$Main$DomainOwnershipDetails, details.organization, details.state, details.country),
-								websiteUrl: 'Sucess'
+								domainStatus: 'Sucess'
 							}),
 						$elm$core$Platform$Cmd$none);
 				} else {
@@ -9116,7 +9168,7 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								websiteUrl: $author$project$Main$errorToString(err)
+								domainStatus: $author$project$Main$errorToString(err)
 							}),
 						$elm$core$Platform$Cmd$none);
 				}
@@ -9326,7 +9378,7 @@ var $author$project$Main$viewDomain = function (model) {
 										_List_fromArray(
 											[
 												$elm$html$Html$Attributes$type_('checkbox'),
-												$elm$html$Html$Attributes$checked(model.domainSelected),
+												$elm$html$Html$Attributes$checked(model.apiSelection.domainSelected),
 												$elm$html$Html$Events$onCheck(
 												$author$project$Main$ApiSelectionChange($author$project$Main$TargetDomain))
 											]),
@@ -9353,7 +9405,7 @@ var $author$project$Main$viewDomain = function (model) {
 								_List_Nil,
 								_List_fromArray(
 									[
-										$elm$html$Html$text('Status')
+										$elm$html$Html$text(model.domainStatus)
 									]))
 							])),
 						A2(
@@ -9394,6 +9446,210 @@ var $author$project$Main$viewDomain = function (model) {
 				$author$project$Main$renderIf,
 				model.showDomainDetails,
 				$author$project$Main$viewExpandDomain(model))
+			]));
+};
+var $author$project$Main$viewInfo = function (model) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('dashbord dashbord-info')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('detail-section')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('head-general-info')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$h1,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('API')
+									]))
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('head-activate')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$h1,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Active')
+									]))
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('head-status-info')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$h1,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Status')
+									]))
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('head-expand-item')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$h1,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Details')
+									]))
+							]))
+					]))
+			]));
+};
+var $author$project$Main$TargetLink = {$: 'TargetLink'};
+var $author$project$Main$viewLink = function (model) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('dashbord dashbord-speed')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('detail-section')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('general-info')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$h1,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Link')
+									]))
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('activate')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$label,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('switch')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$input,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$type_('checkbox'),
+												$elm$html$Html$Attributes$checked(model.apiSelection.linkSelected),
+												$elm$html$Html$Events$onCheck(
+												$author$project$Main$ApiSelectionChange($author$project$Main$TargetLink))
+											]),
+										_List_Nil),
+										A2(
+										$elm$html$Html$span,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('slider round')
+											]),
+										_List_Nil)
+									]))
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('status-info')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$h1,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Status')
+									]))
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('expand-item')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$a,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('arrowButton')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$span,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('leftSide')
+											]),
+										_List_Nil),
+										A2(
+										$elm$html$Html$span,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('rightSide')
+											]),
+										_List_Nil)
+									]))
+							]))
+					]))
 			]));
 };
 var $author$project$Main$viewSelection = function (model) {
@@ -9460,7 +9716,7 @@ var $author$project$Main$viewSpeed = function (model) {
 										_List_fromArray(
 											[
 												$elm$html$Html$Attributes$type_('checkbox'),
-												$elm$html$Html$Attributes$checked(model.speedSelected),
+												$elm$html$Html$Attributes$checked(model.apiSelection.speedSelected),
 												$elm$html$Html$Events$onCheck(
 												$author$project$Main$ApiSelectionChange($author$project$Main$TargetSpeed))
 											]),
@@ -9580,9 +9836,129 @@ var $author$project$Main$viewStack = function (model) {
 										_List_fromArray(
 											[
 												$elm$html$Html$Attributes$type_('checkbox'),
-												$elm$html$Html$Attributes$checked(model.stackSelected),
+												$elm$html$Html$Attributes$checked(model.apiSelection.stackSelected),
 												$elm$html$Html$Events$onCheck(
 												$author$project$Main$ApiSelectionChange($author$project$Main$TargetStack))
+											]),
+										_List_Nil),
+										A2(
+										$elm$html$Html$span,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('slider round')
+											]),
+										_List_Nil)
+									]))
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('status-info')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$h1,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Status')
+									]))
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('expand-item')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$a,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('arrowButton')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$span,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('leftSide')
+											]),
+										_List_Nil),
+										A2(
+										$elm$html$Html$span,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('rightSide')
+											]),
+										_List_Nil)
+									]))
+							]))
+					]))
+			]));
+};
+var $author$project$Main$TargetStruct = {$: 'TargetStruct'};
+var $author$project$Main$viewStructure = function (model) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('dashbord dashbord-speed')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('detail-section')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('general-info')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$h1,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Structure')
+									]))
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('activate')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$label,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('switch')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$input,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$type_('checkbox'),
+												$elm$html$Html$Attributes$checked(model.apiSelection.structureSelected),
+												$elm$html$Html$Events$onCheck(
+												$author$project$Main$ApiSelectionChange($author$project$Main$TargetStruct))
 											]),
 										_List_Nil),
 										A2(
@@ -9693,9 +10069,12 @@ var $author$project$Main$view = function (model) {
 							])),
 						$author$project$Main$viewSelection(model)
 					])),
+				$author$project$Main$viewInfo(model),
 				$author$project$Main$viewDomain(model),
 				$author$project$Main$viewSpeed(model),
-				$author$project$Main$viewStack(model)
+				$author$project$Main$viewStack(model),
+				$author$project$Main$viewLink(model),
+				$author$project$Main$viewStructure(model)
 			]));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
