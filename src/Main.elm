@@ -8,7 +8,7 @@ import Draggable
 import Html exposing (Html, a, br, button, div, h1, h2, hr, i, input, label, li, option, p, select, small, span, text, ul)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onCheck, onClick, onInput)
-import Http
+import Http exposing (Header, emptyBody)
 import Http.Xml
 import Json.Decode as D
 import Url as U exposing (Url)
@@ -25,6 +25,7 @@ type alias Model =
     , drag : Draggable.State String
     , speedDetails : SpeedDetails
     , domainOwnershipDetails : DomainOwnershipDetails
+    , stackDetails : StackDetails
     , isValid : Bool
     , showDomainDetails : Bool
     , apiSelection : ApiSelection
@@ -41,6 +42,7 @@ initialModel =
     , drag = Draggable.init
     , speedDetails = SpeedDetails "" ""
     , domainOwnershipDetails = DomainOwnershipDetails "" "" ""
+    , stackDetails = StackDetails []
     , isValid = False
     , showDomainDetails = False
     , apiSelection = ApiSelection False False False False False
@@ -65,6 +67,7 @@ type Msg
     | DragMsg (Draggable.Msg String)
     | GotSpeed (Result Http.Error SpeedDetails)
     | GotDomain (Result Http.Error DomainOwnershipDetails)
+    | GotStack (Result Http.Error StackDetails)
     | UrlChange String
     | ExpandDomainContent
     | ApiSelectionChange Target Bool
@@ -74,7 +77,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ClickCheckWebsite ->
-            ( model, Cmd.batch [ fetchFromWhoIsXML model model.websiteUrl, fetchFromGooglePageSpeedTest model model.websiteUrl ] )
+            ( model, Cmd.batch [ fetchFromWhoIsXML model model.websiteUrl, fetchFromGooglePageSpeedTest model model.websiteUrl, fetchFromWappalyzer model model.websiteUrl ] )
 
         ExpandDomainContent ->
             ( { model | showDomainDetails = not model.showDomainDetails }, Cmd.none )
@@ -122,6 +125,14 @@ update msg model =
                 Err err ->
                     ( { model | domainStatus = errorToString err }, Cmd.none )
 
+        GotStack result ->
+            case result of
+                Ok details ->
+                    ( { model | stackStatus = "Sucess", stackDetails = StackDetails details.technologies }, Cmd.none )
+
+                Err err ->
+                    ( { model | domainStatus = errorToString err }, Cmd.none )
+
         DragMsg dragMsg ->
             Draggable.update dragConfig dragMsg model
 
@@ -140,6 +151,22 @@ type alias DomainOwnershipDetails =
     { organization : String
     , state : String
     , country : String
+    }
+
+
+type alias StackDetails =
+    { technologies : List Technologie
+    }
+
+
+type alias Technologie =
+    { name : String
+    , categories : List Category
+    }
+
+
+type alias Category =
+    { name : String
     }
 
 
@@ -235,6 +262,34 @@ wixDecoder =
         (X.path [ "registrant", "country" ] (X.single X.string))
 
 
+
+---call to wappalyzer has an extra [] around its body which isnt needed
+
+
+extractWapDecoder : D.Decoder StackDetails
+extractWapDecoder =
+    D.index 0 wapDecoder
+
+
+wapDecoder : D.Decoder StackDetails
+wapDecoder =
+    D.map StackDetails
+        (D.field "technologies" (D.list techDecoder))
+
+
+techDecoder : D.Decoder Technologie
+techDecoder =
+    D.map2 Technologie
+        (D.field "name" D.string)
+        (D.field "categories" (D.list categoryDecoder))
+
+
+categoryDecoder : D.Decoder Category
+categoryDecoder =
+    D.map Category
+        (D.field "name" D.string)
+
+
 empty : Html msg
 empty =
     Html.text ""
@@ -276,6 +331,23 @@ fetchFromWhoIsXML model websiteUrl =
         Http.get
             { url = String.concat [ "https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_XRwFO1KDNvYMqdy0QfkAGpMhB7i58&domainName=", websiteUrl ]
             , expect = Http.Xml.expectXml GotDomain wixDecoder
+            }
+
+    else
+        Cmd.none
+
+
+fetchFromWappalyzer : Model -> String -> Cmd Msg
+fetchFromWappalyzer model websiteUrl =
+    if model.apiSelection.domainSelected then
+        Http.request
+            { body = Http.emptyBody
+            , expect = Http.expectJson GotStack extractWapDecoder
+            , headers = [ Http.header "x-api-key" "TE48Nq3SAiaeEaeo2HsY1aX4BXxS5pF37l20HelZ" ]
+            , method = "GET"
+            , timeout = Nothing
+            , tracker = Nothing
+            , url = String.concat [ "https://api.wappalyzer.com/lookup/v2/?urls=", websiteUrl ]
             }
 
     else

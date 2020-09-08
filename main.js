@@ -5498,6 +5498,10 @@ var $author$project$Main$SpeedDetails = F2(
 	function (timeToInteractive, firstContentfulPaint) {
 		return {firstContentfulPaint: firstContentfulPaint, timeToInteractive: timeToInteractive};
 	});
+var $author$project$Main$StackDetails = F2(
+	function (technologie, categories) {
+		return {categories: categories, technologie: technologie};
+	});
 var $zaboco$elm_draggable$Internal$NotDragging = {$: 'NotDragging'};
 var $zaboco$elm_draggable$Draggable$State = function (a) {
 	return {$: 'State', a: a};
@@ -5513,6 +5517,7 @@ var $author$project$Main$initialModel = {
 	showDomainDetails: false,
 	speedDetails: A2($author$project$Main$SpeedDetails, '', ''),
 	speedStatus: '',
+	stackDetails: A2($author$project$Main$StackDetails, '', _List_Nil),
 	stackStatus: '',
 	websiteUrl: ''
 };
@@ -9172,6 +9177,28 @@ var $author$project$Main$update = F2(
 							}),
 						$elm$core$Platform$Cmd$none);
 				}
+			case 'GotStack':
+				var result = msg.a;
+				if (result.$ === 'Ok') {
+					var details = result.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								stackDetails: A2($author$project$Main$StackDetails, details.technologie, details.categories),
+								stackStatus: 'Sucess'
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					var err = result.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								domainStatus: $author$project$Main$errorToString(err)
+							}),
+						$elm$core$Platform$Cmd$none);
+				}
 			default:
 				var dragMsg = msg.a;
 				return A3($zaboco$elm_draggable$Draggable$update, $author$project$Main$dragConfig, dragMsg, model);
@@ -9782,6 +9809,60 @@ var $author$project$Main$viewSpeed = function (model) {
 			]));
 };
 var $author$project$Main$TargetStack = {$: 'TargetStack'};
+var $elm$json$Json$Decode$list = _Json_decodeList;
+var $author$project$Main$Category = function (name) {
+	return {name: name};
+};
+var $author$project$Main$categoryDecoder = A2(
+	$elm$json$Json$Decode$map,
+	$author$project$Main$Category,
+	A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string));
+var $author$project$Main$wapDecoder = A3(
+	$elm$json$Json$Decode$map2,
+	$author$project$Main$StackDetails,
+	A2(
+		$elm$json$Json$Decode$at,
+		_List_fromArray(
+			['technologies', 'name']),
+		$elm$json$Json$Decode$string),
+	A2(
+		$elm$json$Json$Decode$at,
+		_List_fromArray(
+			['technologies', 'categories']),
+		$elm$json$Json$Decode$list($author$project$Main$categoryDecoder)));
+var $author$project$Main$decoderToString = F2(
+	function (string, model) {
+		var _v0 = A2(
+			$elm$json$Json$Decode$decodeString,
+			$elm$json$Json$Decode$list($author$project$Main$wapDecoder),
+			string);
+		if (_v0.$ === 'Ok') {
+			var stack = _v0.a;
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('output')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(model.stackDetails.technologie)
+					]));
+		} else {
+			var err = _v0.a;
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('output')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Error')
+					]));
+		}
+	});
+var $author$project$Main$json = '[\n    {\n        "url": "https://hs-flensburg.de",\n        "technologies": [\n            {\n                "slug": "drupal",\n                "name": "Drupal",\n                "versions": [\n                    "8"\n                ],\n                "trafficRank": 73,\n                "categories": [\n                    {\n                        "id": 1,\n                        "slug": "cms",\n                        "name": "CMS"\n                    }\n                ]\n            },\n            {\n                "slug": "ubuntu",\n                "name": "Ubuntu",\n                "versions": [],\n                "trafficRank": 73,\n                "categories": [\n                    {\n                        "id": 28,\n                        "slug": "operating-systems",\n                        "name": "Operating systems"\n                    }\n                ]\n            },\n            {\n                "slug": "jquery",\n                "name": "jQuery",\n                "versions": [\n                    "3.5.1"\n                ],\n                "trafficRank": 73,\n                "categories": [\n                    {\n                        "id": 59,\n                        "slug": "javascript-libraries",\n                        "name": "JavaScript libraries"\n                    }\n                ]\n            },\n            {\n                "slug": "php",\n                "name": "PHP",\n                "versions": [],\n                "trafficRank": 73,\n                "categories": [\n                    {\n                        "id": 27,\n                        "slug": "programming-languages",\n                        "name": "Programming languages"\n                    }\n                ]\n            },\n            {\n                "slug": "matomo-analytics",\n                "name": "Matomo Analytics",\n                "versions": [],\n                "trafficRank": 73,\n                "categories": [\n                    {\n                        "id": 10,\n                        "slug": "analytics",\n                        "name": "Analytics"\n                    }\n                ]\n            },\n            {\n                "slug": "apache",\n                "name": "Apache",\n                "versions": [\n                    "2.4.29"\n                ],\n                "trafficRank": 73,\n                "categories": [\n                    {\n                        "id": 22,\n                        "slug": "web-servers",\n                        "name": "Web servers"\n                    }\n                ]\n            }\n        ],\n        "crawl": true\n    }\n]\n';
 var $author$project$Main$viewStack = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -9863,7 +9944,7 @@ var $author$project$Main$viewStack = function (model) {
 								_List_Nil,
 								_List_fromArray(
 									[
-										$elm$html$Html$text('Status')
+										A2($author$project$Main$decoderToString, $author$project$Main$json, model)
 									]))
 							])),
 						A2(
