@@ -5501,6 +5501,9 @@ var $author$project$Main$SpeedDetails = F2(
 var $author$project$Main$StackDetails = function (technologies) {
 	return {technologies: technologies};
 };
+var $author$project$Main$StructureDetails = function (items) {
+	return {items: items};
+};
 var $zaboco$elm_draggable$Internal$NotDragging = {$: 'NotDragging'};
 var $zaboco$elm_draggable$Draggable$State = function (a) {
 	return {$: 'State', a: a};
@@ -5511,15 +5514,19 @@ var $author$project$Main$initialModel = {
 	domainOwnershipDetails: A3($author$project$Main$DomainOwnershipDetails, '', '', ''),
 	domainStatus: 'Status',
 	drag: $zaboco$elm_draggable$Draggable$init,
+	input: '',
 	isValid: false,
 	position: _Utils_Tuple2(0, 0),
 	showDomainDetails: false,
 	showStackDetails: false,
+	showStructDetails: false,
 	speedDetails: A2($author$project$Main$SpeedDetails, '', ''),
-	speedStatus: '',
+	speedStatus: 'Status',
 	stackDetails: $author$project$Main$StackDetails(_List_Nil),
-	stackStatus: '',
-	websiteUrl: ''
+	stackStatus: 'Status',
+	structDetails: $author$project$Main$StructureDetails(_List_Nil),
+	structStatus: 'Status',
+	websiteUrl: $elm$core$Maybe$Nothing
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
@@ -5986,12 +5993,6 @@ var $zaboco$elm_draggable$Draggable$subscriptions = F2(
 var $author$project$Main$subscriptions = function (model) {
 	return A2($zaboco$elm_draggable$Draggable$subscriptions, $author$project$Main$DragMsg, model.drag);
 };
-var $elm$core$Basics$not = _Basics_not;
-var $author$project$Main$checkWebsite = function (websiteUrl) {
-	return !_Utils_eq(
-		$elm$url$Url$fromString(websiteUrl),
-		$elm$core$Maybe$Nothing);
-};
 var $author$project$Main$OnDragBy = function (a) {
 	return {$: 'OnDragBy', a: a};
 };
@@ -6043,11 +6044,11 @@ var $author$project$Main$errorToString = function (error) {
 			}
 		default:
 			var errorMessage = error.a;
-			return 'No Information found';
+			return errorMessage;
 	}
 };
-var $author$project$Main$GotSpeed = function (a) {
-	return {$: 'GotSpeed', a: a};
+var $author$project$Main$GotStack = function (a) {
+	return {$: 'GotStack', a: a};
 };
 var $elm$core$String$concat = function (strings) {
 	return A2($elm$core$String$join, '', strings);
@@ -6554,6 +6555,40 @@ var $elm$http$Http$expectJson = F2(
 						A2($elm$json$Json$Decode$decodeString, decoder, string));
 				}));
 	});
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$json$Json$Decode$index = _Json_decodeIndex;
+var $elm$json$Json$Decode$list = _Json_decodeList;
+var $author$project$Main$Technologie = F2(
+	function (name, categories) {
+		return {categories: categories, name: name};
+	});
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $author$project$Main$techDecoder = A3(
+	$elm$json$Json$Decode$map2,
+	$author$project$Main$Technologie,
+	A2($elm$json$Json$Decode$field, 'Name', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'Tag', $elm$json$Json$Decode$string));
+var $author$project$Main$wapDecoder = A2(
+	$elm$json$Json$Decode$map,
+	$author$project$Main$StackDetails,
+	A2(
+		$elm$json$Json$Decode$field,
+		'Technologies',
+		$elm$json$Json$Decode$list($author$project$Main$techDecoder)));
+var $author$project$Main$extractWapDecoder = A2(
+	$elm$json$Json$Decode$field,
+	'Results',
+	A2(
+		$elm$json$Json$Decode$index,
+		0,
+		A2(
+			$elm$json$Json$Decode$at,
+			_List_fromArray(
+				['Result', 'Paths']),
+			A2($elm$json$Json$Decode$index, 0, $author$project$Main$wapDecoder))));
 var $elm$http$Http$emptyBody = _Http_emptyBody;
 var $elm$http$Http$Request = function (a) {
 	return {$: 'Request', a: a};
@@ -6708,7 +6743,114 @@ var $elm$http$Http$get = function (r) {
 	return $elm$http$Http$request(
 		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
-var $elm$json$Json$Decode$string = _Json_decodeString;
+var $elm$url$Url$addPort = F2(
+	function (maybePort, starter) {
+		if (maybePort.$ === 'Nothing') {
+			return starter;
+		} else {
+			var port_ = maybePort.a;
+			return starter + (':' + $elm$core$String$fromInt(port_));
+		}
+	});
+var $elm$url$Url$addPrefixed = F3(
+	function (prefix, maybeSegment, starter) {
+		if (maybeSegment.$ === 'Nothing') {
+			return starter;
+		} else {
+			var segment = maybeSegment.a;
+			return _Utils_ap(
+				starter,
+				_Utils_ap(prefix, segment));
+		}
+	});
+var $elm$url$Url$toString = function (url) {
+	var http = function () {
+		var _v0 = url.protocol;
+		if (_v0.$ === 'Http') {
+			return 'http://';
+		} else {
+			return 'https://';
+		}
+	}();
+	return A3(
+		$elm$url$Url$addPrefixed,
+		'#',
+		url.fragment,
+		A3(
+			$elm$url$Url$addPrefixed,
+			'?',
+			url.query,
+			_Utils_ap(
+				A2(
+					$elm$url$Url$addPort,
+					url.port_,
+					_Utils_ap(http, url.host)),
+				url.path)));
+};
+var $author$project$Main$fetchFromBuiltwith = F2(
+	function (model, websiteUrl) {
+		if (websiteUrl.$ === 'Just') {
+			var url = websiteUrl.a;
+			return model.apiSelection.stackSelected ? $elm$http$Http$get(
+				{
+					expect: A2($elm$http$Http$expectJson, $author$project$Main$GotStack, $author$project$Main$extractWapDecoder),
+					url: $elm$core$String$concat(
+						_List_fromArray(
+							[
+								'https://api.builtwith.com/v17/api.json?KEY=8e1d176e-26be-4379-8f60-79d46a255c0d&LOOKUP=',
+								$elm$url$Url$toString(url),
+								'&HIDEDL=no'
+							]))
+				}) : $elm$core$Platform$Cmd$none;
+		} else {
+			return $elm$core$Platform$Cmd$none;
+		}
+	});
+var $author$project$Main$GotStructure = function (a) {
+	return {$: 'GotStructure', a: a};
+};
+var $author$project$Main$StructureItem = F3(
+	function (source, dest, status) {
+		return {dest: dest, source: source, status: status};
+	});
+var $elm$json$Json$Decode$int = _Json_decodeInt;
+var $elm$json$Json$Decode$map3 = _Json_map3;
+var $author$project$Main$itemDecoder = A4(
+	$elm$json$Json$Decode$map3,
+	$author$project$Main$StructureItem,
+	A2($elm$json$Json$Decode$field, 'url_src', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'url_dest', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'status', $elm$json$Json$Decode$int));
+var $author$project$Main$crawlDecoder = A2(
+	$elm$json$Json$Decode$map,
+	$author$project$Main$StructureDetails,
+	A2(
+		$elm$json$Json$Decode$field,
+		'items',
+		$elm$json$Json$Decode$list($author$project$Main$itemDecoder)));
+var $author$project$Main$fetchFromCrawler = F2(
+	function (model, websiteUrl) {
+		if (websiteUrl.$ === 'Just') {
+			var url = websiteUrl.a;
+			return model.apiSelection.structureSelected ? $elm$http$Http$get(
+				{
+					expect: A2($elm$http$Http$expectJson, $author$project$Main$GotStructure, $author$project$Main$crawlDecoder),
+					url: $elm$core$String$concat(
+						_List_fromArray(
+							[
+								'http://arne-baumann.de:9080/crawl.json?spider_name=linkspider&start_requests=true&domain=',
+								url.host,
+								'&starturl=',
+								$elm$url$Url$toString(url)
+							]))
+				}) : $elm$core$Platform$Cmd$none;
+		} else {
+			return $elm$core$Platform$Cmd$none;
+		}
+	});
+var $author$project$Main$GotSpeed = function (a) {
+	return {$: 'GotSpeed', a: a};
+};
 var $author$project$Main$gpstDecoder = A3(
 	$elm$json$Json$Decode$map2,
 	$author$project$Main$SpeedDetails,
@@ -6734,59 +6876,22 @@ var $author$project$Main$gpstDecoder = A3(
 				A2($elm$json$Json$Decode$field, 'displayValue', $elm$json$Json$Decode$string)))));
 var $author$project$Main$fetchFromGooglePageSpeedTest = F2(
 	function (model, websiteUrl) {
-		return model.apiSelection.speedSelected ? $elm$http$Http$get(
-			{
-				expect: A2($elm$http$Http$expectJson, $author$project$Main$GotSpeed, $author$project$Main$gpstDecoder),
-				url: $elm$core$String$concat(
-					_List_fromArray(
-						['https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=', websiteUrl, '&key=AIzaSyBfcmkhsGWVmLlVYn0YkTk6dDZFrcbbXV4&category=PERFORMANCE&strategy=DESKTOP']))
-			}) : $elm$core$Platform$Cmd$none;
-	});
-var $author$project$Main$GotStack = function (a) {
-	return {$: 'GotStack', a: a};
-};
-var $elm$json$Json$Decode$at = F2(
-	function (fields, decoder) {
-		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
-	});
-var $elm$json$Json$Decode$index = _Json_decodeIndex;
-var $elm$json$Json$Decode$list = _Json_decodeList;
-var $author$project$Main$Technologie = F2(
-	function (name, categories) {
-		return {categories: categories, name: name};
-	});
-var $author$project$Main$techDecoder = A3(
-	$elm$json$Json$Decode$map2,
-	$author$project$Main$Technologie,
-	A2($elm$json$Json$Decode$field, 'Name', $elm$json$Json$Decode$string),
-	A2($elm$json$Json$Decode$field, 'Tag', $elm$json$Json$Decode$string));
-var $author$project$Main$wapDecoder = A2(
-	$elm$json$Json$Decode$map,
-	$author$project$Main$StackDetails,
-	A2(
-		$elm$json$Json$Decode$field,
-		'Technologies',
-		$elm$json$Json$Decode$list($author$project$Main$techDecoder)));
-var $author$project$Main$extractWapDecoder = A2(
-	$elm$json$Json$Decode$field,
-	'Results',
-	A2(
-		$elm$json$Json$Decode$index,
-		0,
-		A2(
-			$elm$json$Json$Decode$at,
-			_List_fromArray(
-				['Result', 'Paths']),
-			A2($elm$json$Json$Decode$index, 0, $author$project$Main$wapDecoder))));
-var $author$project$Main$fetchFromWappalyzer = F2(
-	function (model, websiteUrl) {
-		return model.apiSelection.stackSelected ? $elm$http$Http$get(
-			{
-				expect: A2($elm$http$Http$expectJson, $author$project$Main$GotStack, $author$project$Main$extractWapDecoder),
-				url: $elm$core$String$concat(
-					_List_fromArray(
-						['https://api.builtwith.com/v17/api.json?KEY=8e1d176e-26be-4379-8f60-79d46a255c0d&LOOKUP=', websiteUrl, '&HIDEDL=no']))
-			}) : $elm$core$Platform$Cmd$none;
+		if (websiteUrl.$ === 'Just') {
+			var url = websiteUrl.a;
+			return model.apiSelection.speedSelected ? $elm$http$Http$get(
+				{
+					expect: A2($elm$http$Http$expectJson, $author$project$Main$GotSpeed, $author$project$Main$gpstDecoder),
+					url: $elm$core$String$concat(
+						_List_fromArray(
+							[
+								'https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=',
+								$elm$url$Url$toString(url),
+								'&key=AIzaSyBfcmkhsGWVmLlVYn0YkTk6dDZFrcbbXV4&category=PERFORMANCE&strategy=DESKTOP'
+							]))
+				}) : $elm$core$Platform$Cmd$none;
+		} else {
+			return $elm$core$Platform$Cmd$none;
+		}
 	});
 var $author$project$Main$GotDomain = function (a) {
 	return {$: 'GotDomain', a: a};
@@ -7096,6 +7201,7 @@ var $elm$parser$Parser$Advanced$fromState = F2(
 			A4($elm$parser$Parser$Advanced$DeadEnd, s.row, s.col, x, s.context));
 	});
 var $elm$parser$Parser$Advanced$isSubString = _Parser_isSubString;
+var $elm$core$Basics$not = _Basics_not;
 var $elm$parser$Parser$Advanced$token = function (_v0) {
 	var str = _v0.a;
 	var expecting = _v0.b;
@@ -8954,13 +9060,21 @@ var $author$project$Main$wixDecoder = A4(
 		$ymtszw$elm_xml_decode$Xml$Decode$single($ymtszw$elm_xml_decode$Xml$Decode$string)));
 var $author$project$Main$fetchFromWhoIsXML = F2(
 	function (model, websiteUrl) {
-		return model.apiSelection.domainSelected ? $elm$http$Http$get(
-			{
-				expect: A2($ymtszw$elm_http_xml$Http$Xml$expectXml, $author$project$Main$GotDomain, $author$project$Main$wixDecoder),
-				url: $elm$core$String$concat(
-					_List_fromArray(
-						['https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_XRwFO1KDNvYMqdy0QfkAGpMhB7i58&domainName=', websiteUrl]))
-			}) : $elm$core$Platform$Cmd$none;
+		if (websiteUrl.$ === 'Just') {
+			var url = websiteUrl.a;
+			return model.apiSelection.domainSelected ? $elm$http$Http$get(
+				{
+					expect: A2($ymtszw$elm_http_xml$Http$Xml$expectXml, $author$project$Main$GotDomain, $author$project$Main$wixDecoder),
+					url: $elm$core$String$concat(
+						_List_fromArray(
+							[
+								'https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_XRwFO1KDNvYMqdy0QfkAGpMhB7i58&domainName=',
+								$elm$url$Url$toString(url)
+							]))
+				}) : $elm$core$Platform$Cmd$none;
+		} else {
+			return $elm$core$Platform$Cmd$none;
+		}
 	});
 var $elm$core$Basics$round = _Basics_round;
 var $author$project$Main$toggleDomainSelected = function (selection) {
@@ -9101,7 +9215,8 @@ var $author$project$Main$update = F2(
 							[
 								A2($author$project$Main$fetchFromWhoIsXML, model, model.websiteUrl),
 								A2($author$project$Main$fetchFromGooglePageSpeedTest, model, model.websiteUrl),
-								A2($author$project$Main$fetchFromWappalyzer, model, model.websiteUrl)
+								A2($author$project$Main$fetchFromBuiltwith, model, model.websiteUrl),
+								A2($author$project$Main$fetchFromCrawler, model, model.websiteUrl)
 							])));
 			case 'ExpandDomainContent':
 				return _Utils_Tuple2(
@@ -9115,14 +9230,20 @@ var $author$project$Main$update = F2(
 						model,
 						{showStackDetails: !model.showStackDetails}),
 					$elm$core$Platform$Cmd$none);
+			case 'ExpandStructContent':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{showStructDetails: !model.showStructDetails}),
+					$elm$core$Platform$Cmd$none);
 			case 'UrlChange':
-				var newUrl = msg.a;
+				var newInput = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							isValid: $author$project$Main$checkWebsite(newUrl),
-							websiteUrl: newUrl
+							input: newInput,
+							websiteUrl: $elm$url$Url$fromString(newInput)
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'ApiSelectionChange':
@@ -9248,7 +9369,29 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								domainStatus: $author$project$Main$errorToString(err)
+								stackStatus: $author$project$Main$errorToString(err)
+							}),
+						$elm$core$Platform$Cmd$none);
+				}
+			case 'GotStructure':
+				var result = msg.a;
+				if (result.$ === 'Ok') {
+					var details = result.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								structDetails: $author$project$Main$StructureDetails(details.items),
+								structStatus: 'Sucess'
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					var err = result.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								structStatus: $author$project$Main$errorToString(err)
 							}),
 						$elm$core$Platform$Cmd$none);
 				}
@@ -10041,7 +10184,11 @@ var $author$project$Main$viewStack = function (model) {
 				$author$project$Main$viewExpandStack(model))
 			]));
 };
+var $author$project$Main$ExpandStructContent = {$: 'ExpandStructContent'};
 var $author$project$Main$TargetStruct = {$: 'TargetStruct'};
+var $author$project$Main$viewExpandStruct = function (model) {
+	return $author$project$Main$empty;
+};
 var $author$project$Main$viewStructure = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -10123,7 +10270,7 @@ var $author$project$Main$viewStructure = function (model) {
 								_List_Nil,
 								_List_fromArray(
 									[
-										$elm$html$Html$text('Status')
+										$elm$html$Html$text(model.structStatus)
 									]))
 							])),
 						A2(
@@ -10138,7 +10285,8 @@ var $author$project$Main$viewStructure = function (model) {
 								$elm$html$Html$a,
 								_List_fromArray(
 									[
-										$elm$html$Html$Attributes$class('arrowButton')
+										$elm$html$Html$Attributes$class('arrowButton'),
+										$elm$html$Html$Events$onClick($author$project$Main$ExpandStructContent)
 									]),
 								_List_fromArray(
 									[
@@ -10158,7 +10306,11 @@ var $author$project$Main$viewStructure = function (model) {
 										_List_Nil)
 									]))
 							]))
-					]))
+					])),
+				A2(
+				$author$project$Main$renderIf,
+				model.showStructDetails,
+				$author$project$Main$viewExpandStruct(model))
 			]));
 };
 var $author$project$Main$view = function (model) {
@@ -10185,7 +10337,7 @@ var $author$project$Main$view = function (model) {
 								$elm$html$Html$Attributes$class('urlInput'),
 								$elm$html$Html$Attributes$placeholder(''),
 								$elm$html$Html$Attributes$type_('text'),
-								$elm$html$Html$Attributes$value(model.websiteUrl),
+								$elm$html$Html$Attributes$value(model.input),
 								$elm$html$Html$Events$onInput($author$project$Main$UrlChange)
 							]),
 						_List_Nil),

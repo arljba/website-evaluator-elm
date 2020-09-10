@@ -20,37 +20,45 @@ import Xml.Decode as X
 
 
 type alias Model =
-    { websiteUrl : String
+    { input : String
+    , websiteUrl : Maybe Url
     , position : ( Int, Int )
     , drag : Draggable.State String
     , speedDetails : SpeedDetails
     , domainOwnershipDetails : DomainOwnershipDetails
     , stackDetails : StackDetails
+    , structDetails : StructureDetails
     , isValid : Bool
     , showDomainDetails : Bool
     , showStackDetails : Bool
+    , showStructDetails : Bool
     , apiSelection : ApiSelection
     , domainStatus : String
     , speedStatus : String
     , stackStatus : String
+    , structStatus : String
     }
 
 
 initialModel : Model
 initialModel =
-    { websiteUrl = ""
+    { input = ""
+    , websiteUrl = Nothing
     , position = ( 0, 0 )
     , drag = Draggable.init
     , speedDetails = SpeedDetails "" ""
     , domainOwnershipDetails = DomainOwnershipDetails "" "" ""
     , stackDetails = StackDetails []
+    , structDetails = StructureDetails []
     , isValid = False
     , showDomainDetails = False
     , showStackDetails = False
+    , showStructDetails = False
     , apiSelection = ApiSelection False False False False False
     , domainStatus = "Status"
-    , speedStatus = ""
-    , stackStatus = ""
+    , speedStatus = "Status"
+    , stackStatus = "Status"
+    , structStatus = "Status"
     }
 
 
@@ -70,9 +78,11 @@ type Msg
     | GotSpeed (Result Http.Error SpeedDetails)
     | GotDomain (Result Http.Error DomainOwnershipDetails)
     | GotStack (Result Http.Error StackDetails)
+    | GotStructure (Result Http.Error StructureDetails)
     | UrlChange String
     | ExpandDomainContent
     | ExpandStackContent
+    | ExpandStructContent
     | ApiSelectionChange Target Bool
 
 
@@ -80,7 +90,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ClickCheckWebsite ->
-            ( model, Cmd.batch [ fetchFromWhoIsXML model model.websiteUrl, fetchFromGooglePageSpeedTest model model.websiteUrl, fetchFromWappalyzer model model.websiteUrl ] )
+            ( model, Cmd.batch [ fetchFromWhoIsXML model model.websiteUrl, fetchFromGooglePageSpeedTest model model.websiteUrl, fetchFromBuiltwith model model.websiteUrl, fetchFromCrawler model model.websiteUrl ] )
 
         ExpandDomainContent ->
             ( { model | showDomainDetails = not model.showDomainDetails }, Cmd.none )
@@ -88,8 +98,11 @@ update msg model =
         ExpandStackContent ->
             ( { model | showStackDetails = not model.showStackDetails }, Cmd.none )
 
-        UrlChange newUrl ->
-            ( { model | websiteUrl = newUrl, isValid = checkWebsite newUrl }, Cmd.none )
+        ExpandStructContent ->
+            ( { model | showStructDetails = not model.showStructDetails }, Cmd.none )
+
+        UrlChange newInput ->
+            ( { model | input = newInput, websiteUrl = U.fromString newInput }, Cmd.none )
 
         ApiSelectionChange target bool ->
             case target of
@@ -137,7 +150,15 @@ update msg model =
                     ( { model | stackStatus = "Sucess", stackDetails = StackDetails details.technologies }, Cmd.none )
 
                 Err err ->
-                    ( { model | domainStatus = errorToString err }, Cmd.none )
+                    ( { model | stackStatus = errorToString err }, Cmd.none )
+
+        GotStructure result ->
+            case result of
+                Ok details ->
+                    ( { model | structStatus = "Sucess", structDetails = StructureDetails details.items }, Cmd.none )
+
+                Err err ->
+                    ( { model | structStatus = errorToString err }, Cmd.none )
 
         DragMsg dragMsg ->
             Draggable.update dragConfig dragMsg model
@@ -168,6 +189,17 @@ type alias StackDetails =
 type alias Technologie =
     { name : String
     , categories : String
+    }
+
+
+type alias StructureDetails =
+    { items : List StructureItem }
+
+
+type alias StructureItem =
+    { source : String
+    , dest : String
+    , status : Int
     }
 
 
@@ -226,11 +258,6 @@ subscriptions model =
 ---- Functions ----
 
 
-checkWebsite : String -> Bool
-checkWebsite websiteUrl =
-    not (U.fromString websiteUrl == Nothing)
-
-
 dragConfig : Draggable.Config String Msg
 dragConfig =
     Draggable.basicConfig OnDragBy
@@ -263,10 +290,6 @@ wixDecoder =
         (X.path [ "registrant", "country" ] (X.single X.string))
 
 
-
----call to wappalyzer has an extra [] around its body which isnt needed
-
-
 extractWapDecoder : D.Decoder StackDetails
 extractWapDecoder =
     D.field "Results" (D.index 0 (D.at [ "Result", "Paths" ] (D.index 0 wapDecoder)))
@@ -283,6 +306,20 @@ techDecoder =
     D.map2 Technologie
         (D.field "Name" D.string)
         (D.field "Tag" D.string)
+
+
+crawlDecoder : D.Decoder StructureDetails
+crawlDecoder =
+    D.map StructureDetails
+        (D.field "items" (D.list itemDecoder))
+
+
+itemDecoder : D.Decoder StructureItem
+itemDecoder =
+    D.map3 StructureItem
+        (D.field "url_src" D.string)
+        (D.field "url_dest" D.string)
+        (D.field "status" D.int)
 
 
 empty : Html msg
@@ -308,40 +345,72 @@ removeFromList i xs =
 --- For some reason "d.at" doent work with D.at maybe look at it later
 
 
-fetchFromGooglePageSpeedTest : Model -> String -> Cmd Msg
+fetchFromGooglePageSpeedTest : Model -> Maybe Url -> Cmd Msg
 fetchFromGooglePageSpeedTest model websiteUrl =
-    if model.apiSelection.speedSelected then
-        Http.get
-            { url = String.concat [ "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=", websiteUrl, "&key=AIzaSyBfcmkhsGWVmLlVYn0YkTk6dDZFrcbbXV4&category=PERFORMANCE&strategy=DESKTOP" ]
-            , expect = Http.expectJson GotSpeed gpstDecoder
-            }
+    case websiteUrl of
+        Just url ->
+            if model.apiSelection.speedSelected then
+                Http.get
+                    { url = String.concat [ "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=", U.toString url, "&key=AIzaSyBfcmkhsGWVmLlVYn0YkTk6dDZFrcbbXV4&category=PERFORMANCE&strategy=DESKTOP" ]
+                    , expect = Http.expectJson GotSpeed gpstDecoder
+                    }
 
-    else
-        Cmd.none
+            else
+                Cmd.none
+
+        Nothing ->
+            Cmd.none
 
 
-fetchFromWhoIsXML : Model -> String -> Cmd Msg
+fetchFromWhoIsXML : Model -> Maybe Url -> Cmd Msg
 fetchFromWhoIsXML model websiteUrl =
-    if model.apiSelection.domainSelected then
-        Http.get
-            { url = String.concat [ "https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_XRwFO1KDNvYMqdy0QfkAGpMhB7i58&domainName=", websiteUrl ]
-            , expect = Http.Xml.expectXml GotDomain wixDecoder
-            }
+    case websiteUrl of
+        Just url ->
+            if model.apiSelection.domainSelected then
+                Http.get
+                    { url = String.concat [ "https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_XRwFO1KDNvYMqdy0QfkAGpMhB7i58&domainName=", U.toString url ]
+                    , expect = Http.Xml.expectXml GotDomain wixDecoder
+                    }
 
-    else
-        Cmd.none
+            else
+                Cmd.none
+
+        Nothing ->
+            Cmd.none
 
 
-fetchFromWappalyzer : Model -> String -> Cmd Msg
-fetchFromWappalyzer model websiteUrl =
-    if model.apiSelection.stackSelected then
-        Http.get
-            { url = String.concat [ "https://api.builtwith.com/v17/api.json?KEY=8e1d176e-26be-4379-8f60-79d46a255c0d&LOOKUP=", websiteUrl, "&HIDEDL=no" ]
-            , expect = Http.expectJson GotStack extractWapDecoder
-            }
+fetchFromBuiltwith : Model -> Maybe Url -> Cmd Msg
+fetchFromBuiltwith model websiteUrl =
+    case websiteUrl of
+        Just url ->
+            if model.apiSelection.stackSelected then
+                Http.get
+                    { url = String.concat [ "https://api.builtwith.com/v17/api.json?KEY=8e1d176e-26be-4379-8f60-79d46a255c0d&LOOKUP=", U.toString url, "&HIDEDL=no" ]
+                    , expect = Http.expectJson GotStack extractWapDecoder
+                    }
 
-    else
-        Cmd.none
+            else
+                Cmd.none
+
+        Nothing ->
+            Cmd.none
+
+
+fetchFromCrawler : Model -> Maybe Url -> Cmd Msg
+fetchFromCrawler model websiteUrl =
+    case websiteUrl of
+        Just url ->
+            if model.apiSelection.structureSelected then
+                Http.get
+                    { url = String.concat [ "http://arne-baumann.de:9080/crawl.json?spider_name=linkspider&start_requests=true&domain=", url.host, "&starturl=", U.toString url ]
+                    , expect = Http.expectJson GotStructure crawlDecoder
+                    }
+
+            else
+                Cmd.none
+
+        Nothing ->
+            Cmd.none
 
 
 errorToString : Http.Error -> String
@@ -366,7 +435,7 @@ errorToString error =
             "Unknown error"
 
         Http.BadBody errorMessage ->
-            "No Information found"
+            errorMessage
 
 
 renderTechnologies : Technologie -> Html Msg
@@ -390,7 +459,7 @@ view : Model -> Html Msg
 view model =
     div [ class "main-section" ]
         [ div [ class "header" ]
-            [ input [ class "urlInput", placeholder "", type_ "text", value model.websiteUrl, onInput UrlChange ]
+            [ input [ class "urlInput", placeholder "", type_ "text", value model.input, onInput UrlChange ]
                 []
             , label []
                 [ text "http://" ]
@@ -602,10 +671,10 @@ viewStructure model =
                 ]
             , div [ class "status-info" ]
                 [ h1 []
-                    [ text "Status" ]
+                    [ text model.structStatus ]
                 ]
             , div [ class "expand-item" ]
-                [ a [ class "arrowButton" ]
+                [ a [ class "arrowButton", onClick ExpandStructContent ]
                     [ span [ class "leftSide" ]
                         []
                     , span [ class "rightSide" ]
@@ -613,7 +682,13 @@ viewStructure model =
                     ]
                 ]
             ]
+        , viewExpandStruct model |> renderIf model.showStructDetails
         ]
+
+
+viewExpandStruct : Model -> Html Msg
+viewExpandStruct model =
+    empty
 
 
 viewSelection : Model -> Html Msg
