@@ -2,9 +2,11 @@ module Main exposing (..)
 
 ----Draggable will be used to check the layout of current and furure elements
 
+import Array exposing (append)
 import Browser
 import Browser.Events as Events exposing (Visibility(..))
 import Draggable
+import Graph exposing (Edge, Graph, Node, NodeId)
 import Html exposing (Html, a, br, button, div, h1, h2, hr, i, input, label, li, option, p, select, small, span, text, ul)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onCheck, onClick, onInput)
@@ -448,6 +450,32 @@ renderTechnologies tech =
                 [ text tech.name ]
             ]
         ]
+
+
+
+-------------------List-----------------------------
+
+
+createUniqueList : List String -> List String
+createUniqueList list =
+    case list of
+        [] ->
+            []
+
+        x :: [] ->
+            x :: []
+
+        x :: xs ->
+            if List.member x xs then
+                createUniqueList xs
+
+            else
+                x :: createUniqueList xs
+
+
+createListFromItems : List StructureItem -> List String
+createListFromItems items =
+    List.append (List.map (\record -> record.source) items) (List.map (\record -> record.dest) items)
 
 
 
