@@ -28,6 +28,7 @@ type alias Model =
     , stackDetails : StackDetails
     , isValid : Bool
     , showDomainDetails : Bool
+    , showStackDetails : Bool
     , apiSelection : ApiSelection
     , domainStatus : String
     , speedStatus : String
@@ -45,6 +46,7 @@ initialModel =
     , stackDetails = StackDetails []
     , isValid = False
     , showDomainDetails = False
+    , showStackDetails = False
     , apiSelection = ApiSelection False False False False False
     , domainStatus = "Status"
     , speedStatus = ""
@@ -70,6 +72,7 @@ type Msg
     | GotStack (Result Http.Error StackDetails)
     | UrlChange String
     | ExpandDomainContent
+    | ExpandStackContent
     | ApiSelectionChange Target Bool
 
 
@@ -81,6 +84,9 @@ update msg model =
 
         ExpandDomainContent ->
             ( { model | showDomainDetails = not model.showDomainDetails }, Cmd.none )
+
+        ExpandStackContent ->
+            ( { model | showStackDetails = not model.showStackDetails }, Cmd.none )
 
         UrlChange newUrl ->
             ( { model | websiteUrl = newUrl, isValid = checkWebsite newUrl }, Cmd.none )
@@ -161,12 +167,7 @@ type alias StackDetails =
 
 type alias Technologie =
     { name : String
-    , categories : List Category
-    }
-
-
-type alias Category =
-    { name : String
+    , categories : String
     }
 
 
@@ -268,26 +269,20 @@ wixDecoder =
 
 extractWapDecoder : D.Decoder StackDetails
 extractWapDecoder =
-    D.index 0 wapDecoder
+    D.field "Results" (D.index 0 (D.at [ "Result", "Paths" ] (D.index 0 wapDecoder)))
 
 
 wapDecoder : D.Decoder StackDetails
 wapDecoder =
     D.map StackDetails
-        (D.field "technologies" (D.list techDecoder))
+        (D.field "Technologies" (D.list techDecoder))
 
 
 techDecoder : D.Decoder Technologie
 techDecoder =
     D.map2 Technologie
-        (D.field "name" D.string)
-        (D.field "categories" (D.list categoryDecoder))
-
-
-categoryDecoder : D.Decoder Category
-categoryDecoder =
-    D.map Category
-        (D.field "name" D.string)
+        (D.field "Name" D.string)
+        (D.field "Tag" D.string)
 
 
 empty : Html msg
@@ -339,15 +334,10 @@ fetchFromWhoIsXML model websiteUrl =
 
 fetchFromWappalyzer : Model -> String -> Cmd Msg
 fetchFromWappalyzer model websiteUrl =
-    if model.apiSelection.domainSelected then
-        Http.request
-            { body = Http.emptyBody
+    if model.apiSelection.stackSelected then
+        Http.get
+            { url = String.concat [ "https://api.builtwith.com/v17/api.json?KEY=8e1d176e-26be-4379-8f60-79d46a255c0d&LOOKUP=", websiteUrl, "&HIDEDL=no" ]
             , expect = Http.expectJson GotStack extractWapDecoder
-            , headers = [ Http.header "x-api-key" "TE48Nq3SAiaeEaeo2HsY1aX4BXxS5pF37l20HelZ" ]
-            , method = "GET"
-            , timeout = Nothing
-            , tracker = Nothing
-            , url = String.concat [ "https://api.wappalyzer.com/lookup/v2/?urls=", websiteUrl ]
             }
 
     else
@@ -376,7 +366,19 @@ errorToString error =
             "Unknown error"
 
         Http.BadBody errorMessage ->
-            errorMessage
+            "No Information found"
+
+
+renderTechnologies : Technologie -> Html Msg
+renderTechnologies tech =
+    div [ class "card" ]
+        [ div [ class "card-header" ]
+            [ text tech.categories ]
+        , div [ class "card-main" ]
+            [ div [ class "main-description" ]
+                [ text tech.name ]
+            ]
+        ]
 
 
 
@@ -503,7 +505,7 @@ viewStack model =
                     [ text "Status" ]
                 ]
             , div [ class "expand-item" ]
-                [ a [ class "arrowButton" ]
+                [ a [ class "arrowButton", onClick ExpandStackContent ]
                     [ span [ class "leftSide" ]
                         []
                     , span [ class "rightSide" ]
@@ -511,6 +513,18 @@ viewStack model =
                     ]
                 ]
             ]
+        , viewExpandStack model |> renderIf model.showStackDetails
+        ]
+
+
+viewExpandStack : Model -> Html Msg
+viewExpandStack model =
+    div [ class "stack-content-section" ]
+        [ div [ class "cards" ]
+            (List.map
+                renderTechnologies
+                model.stackDetails.technologies
+            )
         ]
 
 

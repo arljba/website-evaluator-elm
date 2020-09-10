@@ -5498,10 +5498,9 @@ var $author$project$Main$SpeedDetails = F2(
 	function (timeToInteractive, firstContentfulPaint) {
 		return {firstContentfulPaint: firstContentfulPaint, timeToInteractive: timeToInteractive};
 	});
-var $author$project$Main$StackDetails = F2(
-	function (technologie, categories) {
-		return {categories: categories, technologie: technologie};
-	});
+var $author$project$Main$StackDetails = function (technologies) {
+	return {technologies: technologies};
+};
 var $zaboco$elm_draggable$Internal$NotDragging = {$: 'NotDragging'};
 var $zaboco$elm_draggable$Draggable$State = function (a) {
 	return {$: 'State', a: a};
@@ -5515,9 +5514,10 @@ var $author$project$Main$initialModel = {
 	isValid: false,
 	position: _Utils_Tuple2(0, 0),
 	showDomainDetails: false,
+	showStackDetails: false,
 	speedDetails: A2($author$project$Main$SpeedDetails, '', ''),
 	speedStatus: '',
-	stackDetails: A2($author$project$Main$StackDetails, '', _List_Nil),
+	stackDetails: $author$project$Main$StackDetails(_List_Nil),
 	stackStatus: '',
 	websiteUrl: ''
 };
@@ -6043,7 +6043,7 @@ var $author$project$Main$errorToString = function (error) {
 			}
 		default:
 			var errorMessage = error.a;
-			return errorMessage;
+			return 'No Information found';
 	}
 };
 var $author$project$Main$GotSpeed = function (a) {
@@ -6740,6 +6740,52 @@ var $author$project$Main$fetchFromGooglePageSpeedTest = F2(
 				url: $elm$core$String$concat(
 					_List_fromArray(
 						['https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=', websiteUrl, '&key=AIzaSyBfcmkhsGWVmLlVYn0YkTk6dDZFrcbbXV4&category=PERFORMANCE&strategy=DESKTOP']))
+			}) : $elm$core$Platform$Cmd$none;
+	});
+var $author$project$Main$GotStack = function (a) {
+	return {$: 'GotStack', a: a};
+};
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$json$Json$Decode$index = _Json_decodeIndex;
+var $elm$json$Json$Decode$list = _Json_decodeList;
+var $author$project$Main$Technologie = F2(
+	function (name, categories) {
+		return {categories: categories, name: name};
+	});
+var $author$project$Main$techDecoder = A3(
+	$elm$json$Json$Decode$map2,
+	$author$project$Main$Technologie,
+	A2($elm$json$Json$Decode$field, 'Name', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'Tag', $elm$json$Json$Decode$string));
+var $author$project$Main$wapDecoder = A2(
+	$elm$json$Json$Decode$map,
+	$author$project$Main$StackDetails,
+	A2(
+		$elm$json$Json$Decode$field,
+		'Technologies',
+		$elm$json$Json$Decode$list($author$project$Main$techDecoder)));
+var $author$project$Main$extractWapDecoder = A2(
+	$elm$json$Json$Decode$field,
+	'Results',
+	A2(
+		$elm$json$Json$Decode$index,
+		0,
+		A2(
+			$elm$json$Json$Decode$at,
+			_List_fromArray(
+				['Result', 'Paths']),
+			A2($elm$json$Json$Decode$index, 0, $author$project$Main$wapDecoder))));
+var $author$project$Main$fetchFromWappalyzer = F2(
+	function (model, websiteUrl) {
+		return model.apiSelection.stackSelected ? $elm$http$Http$get(
+			{
+				expect: A2($elm$http$Http$expectJson, $author$project$Main$GotStack, $author$project$Main$extractWapDecoder),
+				url: $elm$core$String$concat(
+					_List_fromArray(
+						['https://api.builtwith.com/v17/api.json?KEY=8e1d176e-26be-4379-8f60-79d46a255c0d&LOOKUP=', websiteUrl, '&HIDEDL=no']))
 			}) : $elm$core$Platform$Cmd$none;
 	});
 var $author$project$Main$GotDomain = function (a) {
@@ -9054,13 +9100,20 @@ var $author$project$Main$update = F2(
 						_List_fromArray(
 							[
 								A2($author$project$Main$fetchFromWhoIsXML, model, model.websiteUrl),
-								A2($author$project$Main$fetchFromGooglePageSpeedTest, model, model.websiteUrl)
+								A2($author$project$Main$fetchFromGooglePageSpeedTest, model, model.websiteUrl),
+								A2($author$project$Main$fetchFromWappalyzer, model, model.websiteUrl)
 							])));
 			case 'ExpandDomainContent':
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{showDomainDetails: !model.showDomainDetails}),
+					$elm$core$Platform$Cmd$none);
+			case 'ExpandStackContent':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{showStackDetails: !model.showStackDetails}),
 					$elm$core$Platform$Cmd$none);
 			case 'UrlChange':
 				var newUrl = msg.a;
@@ -9185,7 +9238,7 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								stackDetails: A2($author$project$Main$StackDetails, details.technologie, details.categories),
+								stackDetails: $author$project$Main$StackDetails(details.technologies),
 								stackStatus: 'Sucess'
 							}),
 						$elm$core$Platform$Cmd$none);
@@ -9250,10 +9303,6 @@ var $elm$html$Html$Events$stopPropagationOn = F2(
 			$elm$virtual_dom$VirtualDom$on,
 			event,
 			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
-	});
-var $elm$json$Json$Decode$at = F2(
-	function (fields, decoder) {
-		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
 	});
 var $elm$html$Html$Events$targetValue = A2(
 	$elm$json$Json$Decode$at,
@@ -9808,61 +9857,66 @@ var $author$project$Main$viewSpeed = function (model) {
 					]))
 			]));
 };
+var $author$project$Main$ExpandStackContent = {$: 'ExpandStackContent'};
 var $author$project$Main$TargetStack = {$: 'TargetStack'};
-var $elm$json$Json$Decode$list = _Json_decodeList;
-var $author$project$Main$Category = function (name) {
-	return {name: name};
+var $author$project$Main$renderTechnologies = function (tech) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('card')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('card-header')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(tech.categories)
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('card-main')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('main-description')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(tech.name)
+							]))
+					]))
+			]));
 };
-var $author$project$Main$categoryDecoder = A2(
-	$elm$json$Json$Decode$map,
-	$author$project$Main$Category,
-	A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string));
-var $author$project$Main$wapDecoder = A3(
-	$elm$json$Json$Decode$map2,
-	$author$project$Main$StackDetails,
-	A2(
-		$elm$json$Json$Decode$at,
+var $author$project$Main$viewExpandStack = function (model) {
+	return A2(
+		$elm$html$Html$div,
 		_List_fromArray(
-			['technologies', 'name']),
-		$elm$json$Json$Decode$string),
-	A2(
-		$elm$json$Json$Decode$at,
+			[
+				$elm$html$Html$Attributes$class('stack-content-section')
+			]),
 		_List_fromArray(
-			['technologies', 'categories']),
-		$elm$json$Json$Decode$list($author$project$Main$categoryDecoder)));
-var $author$project$Main$decoderToString = F2(
-	function (string, model) {
-		var _v0 = A2(
-			$elm$json$Json$Decode$decodeString,
-			$elm$json$Json$Decode$list($author$project$Main$wapDecoder),
-			string);
-		if (_v0.$ === 'Ok') {
-			var stack = _v0.a;
-			return A2(
+			[
+				A2(
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('output')
+						$elm$html$Html$Attributes$class('cards')
 					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text(model.stackDetails.technologie)
-					]));
-		} else {
-			var err = _v0.a;
-			return A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('output')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Error')
-					]));
-		}
-	});
-var $author$project$Main$json = '[\n    {\n        "url": "https://hs-flensburg.de",\n        "technologies": [\n            {\n                "slug": "drupal",\n                "name": "Drupal",\n                "versions": [\n                    "8"\n                ],\n                "trafficRank": 73,\n                "categories": [\n                    {\n                        "id": 1,\n                        "slug": "cms",\n                        "name": "CMS"\n                    }\n                ]\n            },\n            {\n                "slug": "ubuntu",\n                "name": "Ubuntu",\n                "versions": [],\n                "trafficRank": 73,\n                "categories": [\n                    {\n                        "id": 28,\n                        "slug": "operating-systems",\n                        "name": "Operating systems"\n                    }\n                ]\n            },\n            {\n                "slug": "jquery",\n                "name": "jQuery",\n                "versions": [\n                    "3.5.1"\n                ],\n                "trafficRank": 73,\n                "categories": [\n                    {\n                        "id": 59,\n                        "slug": "javascript-libraries",\n                        "name": "JavaScript libraries"\n                    }\n                ]\n            },\n            {\n                "slug": "php",\n                "name": "PHP",\n                "versions": [],\n                "trafficRank": 73,\n                "categories": [\n                    {\n                        "id": 27,\n                        "slug": "programming-languages",\n                        "name": "Programming languages"\n                    }\n                ]\n            },\n            {\n                "slug": "matomo-analytics",\n                "name": "Matomo Analytics",\n                "versions": [],\n                "trafficRank": 73,\n                "categories": [\n                    {\n                        "id": 10,\n                        "slug": "analytics",\n                        "name": "Analytics"\n                    }\n                ]\n            },\n            {\n                "slug": "apache",\n                "name": "Apache",\n                "versions": [\n                    "2.4.29"\n                ],\n                "trafficRank": 73,\n                "categories": [\n                    {\n                        "id": 22,\n                        "slug": "web-servers",\n                        "name": "Web servers"\n                    }\n                ]\n            }\n        ],\n        "crawl": true\n    }\n]\n';
+				A2($elm$core$List$map, $author$project$Main$renderTechnologies, model.stackDetails.technologies))
+			]));
+};
 var $author$project$Main$viewStack = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -9944,7 +9998,7 @@ var $author$project$Main$viewStack = function (model) {
 								_List_Nil,
 								_List_fromArray(
 									[
-										A2($author$project$Main$decoderToString, $author$project$Main$json, model)
+										$elm$html$Html$text('Status')
 									]))
 							])),
 						A2(
@@ -9959,7 +10013,8 @@ var $author$project$Main$viewStack = function (model) {
 								$elm$html$Html$a,
 								_List_fromArray(
 									[
-										$elm$html$Html$Attributes$class('arrowButton')
+										$elm$html$Html$Attributes$class('arrowButton'),
+										$elm$html$Html$Events$onClick($author$project$Main$ExpandStackContent)
 									]),
 								_List_fromArray(
 									[
@@ -9979,7 +10034,11 @@ var $author$project$Main$viewStack = function (model) {
 										_List_Nil)
 									]))
 							]))
-					]))
+					])),
+				A2(
+				$author$project$Main$renderIf,
+				model.showStackDetails,
+				$author$project$Main$viewExpandStack(model))
 			]));
 };
 var $author$project$Main$TargetStruct = {$: 'TargetStruct'};

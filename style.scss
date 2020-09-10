@@ -279,3 +279,42 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 } 
+
+.cards{ 
+  margin-top: 30px;
+  display: flex;    
+  flex-wrap: wrap;        
+}
+
+.card {
+  width: 15%;                      
+  overflow: hidden; 
+  margin: 15px;                           
+}
+
+.card-header {
+  margin: auto;  
+  width: 45%;
+  color: #274156;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  border-bottom: 1.5px solid #D0CCD0;
+  background-color: #FBFCFF;
+  padding: 5px 10px;
+}
+
+.card-main {
+  background-color: #FBFCFF;
+  display: flex;          
+  flex-direction: column; 
+  justify-content: center;  
+  align-items: center;       
+  padding: 15px 0;           
+}
+
+.main-description {
+  color: #274156;
+  font-size: 12px;
+  text-align: center;
+}
