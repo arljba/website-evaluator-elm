@@ -60,10 +60,10 @@ initialModel =
     , showStackDetails = False
     , showStructDetails = False
     , apiSelection = ApiSelection False False False False False
-    , domainStatus = "Status"
-    , speedStatus = "Status"
-    , stackStatus = "Status"
-    , structStatus = "Status"
+    , domainStatus = "Not Started"
+    , speedStatus = "Not Started"
+    , stackStatus = "Not Started"
+    , structStatus = "Not Started"
     }
 
 
@@ -139,7 +139,7 @@ update msg model =
                     ( { model | speedStatus = "Sucess", speedDetails = SpeedDetails details.timeToInteractive details.firstContentfulPaint }, Cmd.none )
 
                 Err err ->
-                    ( { model | speedStatus = errorToString err }, Cmd.none )
+                    ( { model | speedStatus = "Error" }, Cmd.none )
 
         GotDomain result ->
             case result of
@@ -147,7 +147,7 @@ update msg model =
                     ( { model | domainStatus = "Sucess", domainOwnershipDetails = DomainOwnershipDetails details.organization details.state details.country }, Cmd.none )
 
                 Err err ->
-                    ( { model | domainStatus = errorToString err }, Cmd.none )
+                    ( { model | domainStatus = "Error" }, Cmd.none )
 
         GotStack result ->
             case result of
@@ -155,7 +155,7 @@ update msg model =
                     ( { model | stackStatus = "Sucess", stackDetails = StackDetails details.technologies }, Cmd.none )
 
                 Err err ->
-                    ( { model | stackStatus = errorToString err }, Cmd.none )
+                    ( { model | stackStatus = "Error" }, Cmd.none )
 
         GotStructure result ->
             case result of
@@ -163,7 +163,7 @@ update msg model =
                     ( { model | structStatus = "Sucess", structDetails = StructureDetails details.items }, Cmd.none )
 
                 Err err ->
-                    ( { model | structStatus = errorToString err }, Cmd.none )
+                    ( { model | structStatus = "Error" }, Cmd.none )
 
         DragMsg dragMsg ->
             Draggable.update dragConfig dragMsg model
@@ -439,8 +439,8 @@ errorToString error =
         Http.BadStatus _ ->
             "Unknown error"
 
-        Http.BadBody errorMessage ->
-            errorMessage
+        Http.BadBody _ ->
+            "Cant parse body"
 
 
 renderTechnologies : Technologie -> Html Msg
@@ -609,7 +609,7 @@ viewSpeed model =
                 ]
             , div [ class "status-info" ]
                 [ h1 []
-                    [ text "Status" ]
+                    [ text model.speedStatus ]
                 ]
             , div [ class "expand-item" ]
                 [ a [ class "arrowButton" ]
@@ -641,7 +641,7 @@ viewStack model =
                 ]
             , div [ class "status-info" ]
                 [ h1 []
-                    [ text "Status" ]
+                    [ text model.stackStatus ]
                 ]
             , div [ class "expand-item" ]
                 [ a [ class "arrowButton", onClick ExpandStackContent ]
@@ -709,7 +709,7 @@ viewLink model =
                 ]
             , div [ class "status-info" ]
                 [ h1 []
-                    [ text "Status" ]
+                    [ text model.domainStatus ]
                 ]
             , div [ class "expand-item" ]
                 [ a [ class "arrowButton" ]

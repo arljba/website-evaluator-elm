@@ -5512,7 +5512,7 @@ var $zaboco$elm_draggable$Draggable$init = $zaboco$elm_draggable$Draggable$State
 var $author$project$Main$initialModel = {
 	apiSelection: A5($author$project$Main$ApiSelection, false, false, false, false, false),
 	domainOwnershipDetails: A3($author$project$Main$DomainOwnershipDetails, '', '', ''),
-	domainStatus: 'Status',
+	domainStatus: 'Not Started',
 	drag: $zaboco$elm_draggable$Draggable$init,
 	input: '',
 	isValid: false,
@@ -5521,11 +5521,11 @@ var $author$project$Main$initialModel = {
 	showStackDetails: false,
 	showStructDetails: false,
 	speedDetails: A2($author$project$Main$SpeedDetails, '', ''),
-	speedStatus: 'Status',
+	speedStatus: 'Not Started',
 	stackDetails: $author$project$Main$StackDetails(_List_Nil),
-	stackStatus: 'Status',
+	stackStatus: 'Not Started',
 	structDetails: $author$project$Main$StructureDetails(_List_Nil),
-	structStatus: 'Status',
+	structStatus: 'Not Started',
 	websiteUrl: $elm$core$Maybe$Nothing
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
@@ -6024,29 +6024,6 @@ var $zaboco$elm_draggable$Draggable$basicConfig = function (onDragByListener) {
 			}));
 };
 var $author$project$Main$dragConfig = $zaboco$elm_draggable$Draggable$basicConfig($author$project$Main$OnDragBy);
-var $author$project$Main$errorToString = function (error) {
-	switch (error.$) {
-		case 'BadUrl':
-			var url = error.a;
-			return 'The URL ' + (url + ' was invalid');
-		case 'Timeout':
-			return 'Unable to reach the server, try again';
-		case 'NetworkError':
-			return 'Unable to reach the server, check your network connection';
-		case 'BadStatus':
-			switch (error.a) {
-				case 500:
-					return 'The server had a problem, try again later';
-				case 400:
-					return 'Verify your information and try again';
-				default:
-					return 'Unknown error';
-			}
-		default:
-			var errorMessage = error.a;
-			return errorMessage;
-	}
-};
 var $author$project$Main$GotStack = function (a) {
 	return {$: 'GotStack', a: a};
 };
@@ -9324,9 +9301,7 @@ var $author$project$Main$update = F2(
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{
-								speedStatus: $author$project$Main$errorToString(err)
-							}),
+							{speedStatus: 'Error'}),
 						$elm$core$Platform$Cmd$none);
 				}
 			case 'GotDomain':
@@ -9346,9 +9321,7 @@ var $author$project$Main$update = F2(
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{
-								domainStatus: $author$project$Main$errorToString(err)
-							}),
+							{domainStatus: 'Error'}),
 						$elm$core$Platform$Cmd$none);
 				}
 			case 'GotStack':
@@ -9368,9 +9341,7 @@ var $author$project$Main$update = F2(
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{
-								stackStatus: $author$project$Main$errorToString(err)
-							}),
+							{stackStatus: 'Error'}),
 						$elm$core$Platform$Cmd$none);
 				}
 			case 'GotStructure':
@@ -9390,9 +9361,7 @@ var $author$project$Main$update = F2(
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{
-								structStatus: $author$project$Main$errorToString(err)
-							}),
+							{structStatus: 'Error'}),
 						$elm$core$Platform$Cmd$none);
 				}
 			default:
@@ -9833,7 +9802,7 @@ var $author$project$Main$viewLink = function (model) {
 								_List_Nil,
 								_List_fromArray(
 									[
-										$elm$html$Html$text('Status')
+										$elm$html$Html$text(model.domainStatus)
 									]))
 							])),
 						A2(
@@ -9962,7 +9931,7 @@ var $author$project$Main$viewSpeed = function (model) {
 								_List_Nil,
 								_List_fromArray(
 									[
-										$elm$html$Html$text('Status')
+										$elm$html$Html$text(model.speedStatus)
 									]))
 							])),
 						A2(
@@ -10141,7 +10110,7 @@ var $author$project$Main$viewStack = function (model) {
 								_List_Nil,
 								_List_fromArray(
 									[
-										$elm$html$Html$text('Status')
+										$elm$html$Html$text(model.stackStatus)
 									]))
 							])),
 						A2(
