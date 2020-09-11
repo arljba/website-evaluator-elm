@@ -8,6 +8,7 @@ import Browser.Events as Events exposing (Visibility(..))
 import Debug as T
 import Dict exposing (Dict)
 import Draggable
+import ForceDirectedGraph as FDG
 import Graph exposing (Edge, Graph, Node, NodeId)
 import Html exposing (Html, a, br, button, div, h1, h2, hr, i, input, label, li, option, p, select, small, span, text, ul)
 import Html.Attributes exposing (..)
@@ -503,7 +504,11 @@ extractMaybebVal list =
                 ( first, second ) ->
                     case ( first, second ) of
                         ( Just f, Just s ) ->
-                            ( f, s ) :: acc
+                            if f == s then
+                                acc
+
+                            else
+                                ( f, s ) :: acc
 
                         ( _, Nothing ) ->
                             acc
@@ -753,7 +758,7 @@ viewStructure model =
 
 viewExpandStruct : Model -> Html Msg
 viewExpandStruct model =
-    empty
+    FDG.initGraph (createGraph model.structDetails.items) |> FDG.viewGraph
 
 
 viewSelection : Model -> Html Msg
@@ -773,3 +778,15 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
+
+
+createGraph : List StructureItem -> Graph String ()
+createGraph items =
+    let
+        labels =
+            createUniqueList (createListFromItems items)
+
+        dict =
+            createDict (createUniqueList (createListFromItems items))
+    in
+    Graph.fromNodeLabelsAndEdgePairs labels (extractMaybebVal (createLinks items dict))
