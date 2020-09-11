@@ -5,6 +5,8 @@ module Main exposing (..)
 import Array exposing (append)
 import Browser
 import Browser.Events as Events exposing (Visibility(..))
+import Debug as T
+import Dict exposing (Dict)
 import Draggable
 import Graph exposing (Edge, Graph, Node, NodeId)
 import Html exposing (Html, a, br, button, div, h1, h2, hr, i, input, label, li, option, p, select, small, span, text, ul)
@@ -456,6 +458,11 @@ renderTechnologies tech =
 -------------------List-----------------------------
 
 
+createListFromItems : List StructureItem -> List String
+createListFromItems items =
+    List.append (List.map (\record -> record.source) items) (List.map (\record -> record.dest) items)
+
+
 createUniqueList : List String -> List String
 createUniqueList list =
     case list of
@@ -473,9 +480,39 @@ createUniqueList list =
                 x :: createUniqueList xs
 
 
-createListFromItems : List StructureItem -> List String
-createListFromItems items =
-    List.append (List.map (\record -> record.source) items) (List.map (\record -> record.dest) items)
+createTupelList : List a -> List ( a, Int )
+createTupelList items =
+    List.indexedMap (\i x -> ( x, i )) items
+
+
+createDict : List String -> Dict String Int
+createDict list =
+    Dict.fromList (createTupelList list)
+
+
+createLinks : List StructureItem -> Dict String Int -> List ( Maybe Int, Maybe Int )
+createLinks list dict =
+    List.map (\record -> ( Dict.get record.source dict, Dict.get record.dest dict )) list
+
+
+extractMaybebVal : List ( Maybe Int, Maybe Int ) -> List ( Int, Int )
+extractMaybebVal list =
+    List.foldr
+        (\mbVal acc ->
+            case mbVal of
+                ( first, second ) ->
+                    case ( first, second ) of
+                        ( Just f, Just s ) ->
+                            ( f, s ) :: acc
+
+                        ( _, Nothing ) ->
+                            acc
+
+                        ( Nothing, _ ) ->
+                            acc
+        )
+        []
+        list
 
 
 
