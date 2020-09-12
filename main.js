@@ -5486,9 +5486,9 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
-var $author$project$Main$ApiSelection = F5(
-	function (domainSelected, speedSelected, stackSelected, linkSelected, structureSelected) {
-		return {domainSelected: domainSelected, linkSelected: linkSelected, speedSelected: speedSelected, stackSelected: stackSelected, structureSelected: structureSelected};
+var $author$project$Main$ApiSelection = F4(
+	function (domainSelected, speedSelected, stackSelected, structureSelected) {
+		return {domainSelected: domainSelected, speedSelected: speedSelected, stackSelected: stackSelected, structureSelected: structureSelected};
 	});
 var $author$project$Main$DomainOwnershipDetails = F3(
 	function (organization, state, country) {
@@ -5510,7 +5510,7 @@ var $zaboco$elm_draggable$Draggable$State = function (a) {
 };
 var $zaboco$elm_draggable$Draggable$init = $zaboco$elm_draggable$Draggable$State($zaboco$elm_draggable$Internal$NotDragging);
 var $author$project$Main$initialModel = {
-	apiSelection: A5($author$project$Main$ApiSelection, false, false, false, false, false),
+	apiSelection: A4($author$project$Main$ApiSelection, false, false, false, false),
 	domainOwnershipDetails: A3($author$project$Main$DomainOwnershipDetails, '', '', ''),
 	domainStatus: 'Not Started',
 	drag: $zaboco$elm_draggable$Draggable$init,
@@ -9070,11 +9070,6 @@ var $author$project$Main$toggleDomainSelected = function (selection) {
 		selection,
 		{domainSelected: !selection.domainSelected});
 };
-var $author$project$Main$toggleLinkSelected = function (selection) {
-	return _Utils_update(
-		selection,
-		{linkSelected: !selection.linkSelected});
-};
 var $author$project$Main$toggleSpeedSelected = function (selection) {
 	return _Utils_update(
 		selection,
@@ -9266,14 +9261,6 @@ var $author$project$Main$update = F2(
 								model,
 								{
 									apiSelection: $author$project$Main$toggleStackSelected(model.apiSelection)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'TargetLink':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									apiSelection: $author$project$Main$toggleLinkSelected(model.apiSelection)
 								}),
 							$elm$core$Platform$Cmd$none);
 					default:
@@ -9850,126 +9837,6 @@ var $author$project$Main$viewInfo = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$text('Details')
-									]))
-							]))
-					]))
-			]));
-};
-var $author$project$Main$TargetLink = {$: 'TargetLink'};
-var $author$project$Main$viewLink = function (model) {
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('dashbord dashbord-speed')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('detail-section')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('general-info')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$h1,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Link')
-									]))
-							])),
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('activate')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$label,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('switch')
-									]),
-								_List_fromArray(
-									[
-										A2(
-										$elm$html$Html$input,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$type_('checkbox'),
-												$elm$html$Html$Attributes$checked(model.apiSelection.linkSelected),
-												$elm$html$Html$Events$onCheck(
-												$author$project$Main$ApiSelectionChange($author$project$Main$TargetLink))
-											]),
-										_List_Nil),
-										A2(
-										$elm$html$Html$span,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('slider round')
-											]),
-										_List_Nil)
-									]))
-							])),
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('status-info')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$h1,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text(model.domainStatus)
-									]))
-							])),
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('expand-item')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$a,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('arrowButton')
-									]),
-								_List_fromArray(
-									[
-										A2(
-										$elm$html$Html$span,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('leftSide')
-											]),
-										_List_Nil),
-										A2(
-										$elm$html$Html$span,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('rightSide')
-											]),
-										_List_Nil)
 									]))
 							]))
 					]))
@@ -13030,7 +12897,6 @@ var $author$project$Main$view = function (model) {
 				$author$project$Main$viewDomain(model),
 				$author$project$Main$viewSpeed(model),
 				$author$project$Main$viewStack(model),
-				$author$project$Main$viewLink(model),
 				$author$project$Main$viewStructure(model)
 			]));
 };

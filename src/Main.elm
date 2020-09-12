@@ -61,7 +61,7 @@ initialModel =
     , showSpeedDetails = False
     , showStackDetails = False
     , showStructDetails = False
-    , apiSelection = ApiSelection False False False False False
+    , apiSelection = ApiSelection False False False False
     , domainStatus = "Not Started"
     , speedStatus = "Not Started"
     , stackStatus = "Not Started"
@@ -125,9 +125,6 @@ update msg model =
 
                 TargetStack ->
                     ( { model | apiSelection = toggleStackSelected model.apiSelection }, Cmd.none )
-
-                TargetLink ->
-                    ( { model | apiSelection = toggleLinkSelected model.apiSelection }, Cmd.none )
 
                 TargetStruct ->
                     ( { model | apiSelection = toggleStructSelected model.apiSelection }, Cmd.none )
@@ -219,7 +216,6 @@ type Target
     = TargetDomain
     | TargetSpeed
     | TargetStack
-    | TargetLink
     | TargetStruct
 
 
@@ -227,7 +223,6 @@ type alias ApiSelection =
     { domainSelected : Bool
     , speedSelected : Bool
     , stackSelected : Bool
-    , linkSelected : Bool
     , structureSelected : Bool
     }
 
@@ -245,11 +240,6 @@ toggleSpeedSelected selection =
 toggleStackSelected : ApiSelection -> ApiSelection
 toggleStackSelected selection =
     { selection | stackSelected = not selection.stackSelected }
-
-
-toggleLinkSelected : ApiSelection -> ApiSelection
-toggleLinkSelected selection =
-    { selection | linkSelected = not selection.linkSelected }
 
 
 toggleStructSelected : ApiSelection -> ApiSelection
@@ -585,7 +575,6 @@ view model =
         , viewDomain model
         , viewSpeed model
         , viewStack model
-        , viewLink model
         , viewStructure model
         ]
 
@@ -803,38 +792,6 @@ viewInfo model =
             , div [ class "head-expand-item" ]
                 [ h1 []
                     [ text "Details" ]
-                ]
-            ]
-        ]
-
-
-viewLink : Model -> Html Msg
-viewLink model =
-    div [ class "dashbord dashbord-speed" ]
-        [ div [ class "detail-section" ]
-            [ div [ class "general-info" ]
-                [ h1 []
-                    [ text "Link" ]
-                ]
-            , div [ class "activate" ]
-                [ label [ class "switch" ]
-                    [ input [ type_ "checkbox", checked model.apiSelection.linkSelected, onCheck (ApiSelectionChange TargetLink) ]
-                        []
-                    , span [ class "slider round" ]
-                        []
-                    ]
-                ]
-            , div [ class "status-info" ]
-                [ h1 []
-                    [ text model.domainStatus ]
-                ]
-            , div [ class "expand-item" ]
-                [ a [ class "arrowButton" ]
-                    [ span [ class "leftSide" ]
-                        []
-                    , span [ class "rightSide" ]
-                        []
-                    ]
                 ]
             ]
         ]
