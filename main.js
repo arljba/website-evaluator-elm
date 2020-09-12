@@ -9012,8 +9012,6 @@ var $author$project$Main$renderIf = F2(
 		return shouldRender ? elem : $author$project$Main$empty;
 	});
 var $elm$html$Html$span = _VirtualDom_node('span');
-var $elm$html$Html$b = _VirtualDom_node('b');
-var $elm$html$Html$h2 = _VirtualDom_node('h2');
 var $elm$html$Html$p = _VirtualDom_node('p');
 var $author$project$Main$viewExpandDomain = function (model) {
 	return A2(
@@ -9049,17 +9047,11 @@ var $author$project$Main$viewExpandDomain = function (model) {
 						_List_fromArray(
 							[
 								A2(
-								$elm$html$Html$h2,
+								$elm$html$Html$h1,
 								_List_Nil,
 								_List_fromArray(
 									[
-										A2(
-										$elm$html$Html$b,
-										_List_Nil,
-										_List_fromArray(
-											[
-												$elm$html$Html$text('Organization')
-											]))
+										$elm$html$Html$text('Organization')
 									])),
 								A2(
 								$elm$html$Html$p,
@@ -9095,17 +9087,11 @@ var $author$project$Main$viewExpandDomain = function (model) {
 						_List_fromArray(
 							[
 								A2(
-								$elm$html$Html$h2,
+								$elm$html$Html$h1,
 								_List_Nil,
 								_List_fromArray(
 									[
-										A2(
-										$elm$html$Html$b,
-										_List_Nil,
-										_List_fromArray(
-											[
-												$elm$html$Html$text('State')
-											]))
+										$elm$html$Html$text('State')
 									])),
 								A2(
 								$elm$html$Html$p,
@@ -9141,17 +9127,11 @@ var $author$project$Main$viewExpandDomain = function (model) {
 						_List_fromArray(
 							[
 								A2(
-								$elm$html$Html$h2,
+								$elm$html$Html$h1,
 								_List_Nil,
 								_List_fromArray(
 									[
-										A2(
-										$elm$html$Html$b,
-										_List_Nil,
-										_List_fromArray(
-											[
-												$elm$html$Html$text('Country')
-											]))
+										$elm$html$Html$text('Country')
 									])),
 								A2(
 								$elm$html$Html$p,
@@ -9643,17 +9623,11 @@ var $author$project$Main$viewExpandSpeed = function (model) {
 						_List_fromArray(
 							[
 								A2(
-								$elm$html$Html$h2,
+								$elm$html$Html$h1,
 								_List_Nil,
 								_List_fromArray(
 									[
-										A2(
-										$elm$html$Html$b,
-										_List_Nil,
-										_List_fromArray(
-											[
-												$elm$html$Html$text('Server Responstime')
-											]))
+										$elm$html$Html$text('Server Responstime')
 									])),
 								A2(
 								$elm$html$Html$p,
@@ -9695,17 +9669,11 @@ var $author$project$Main$viewExpandSpeed = function (model) {
 						_List_fromArray(
 							[
 								A2(
-								$elm$html$Html$h2,
+								$elm$html$Html$h1,
 								_List_Nil,
 								_List_fromArray(
 									[
-										A2(
-										$elm$html$Html$b,
-										_List_Nil,
-										_List_fromArray(
-											[
-												$elm$html$Html$text('Time untill first content is drawn')
-											]))
+										$elm$html$Html$text('Time untill first content is drawn')
 									])),
 								A2(
 								$elm$html$Html$p,
@@ -9747,17 +9715,11 @@ var $author$project$Main$viewExpandSpeed = function (model) {
 						_List_fromArray(
 							[
 								A2(
-								$elm$html$Html$h2,
+								$elm$html$Html$h1,
 								_List_Nil,
 								_List_fromArray(
 									[
-										A2(
-										$elm$html$Html$b,
-										_List_Nil,
-										_List_fromArray(
-											[
-												$elm$html$Html$text('Time untill site is interactive')
-											]))
+										$elm$html$Html$text('Time untill site is interactive')
 									])),
 								A2(
 								$elm$html$Html$p,
@@ -12242,9 +12204,56 @@ var $author$project$ForceDirectedGraph$viewGraph = function (forceGraph) {
 			]));
 };
 var $author$project$Main$viewExpandStruct = function (model) {
-	return $author$project$ForceDirectedGraph$viewGraph(
-		$author$project$ForceDirectedGraph$initGraph(
-			$author$project$Main$createGraph(model.structDetails.items)));
+	var totalLinks = $elm$core$String$fromInt(
+		$elm$core$List$length(model.structDetails.items));
+	var brokenLinks = $elm$core$String$fromInt(
+		$elm$core$List$length(
+			A2(
+				$elm$core$List$filter,
+				function (record) {
+					return record.status !== 200;
+				},
+				model.structDetails.items)));
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('struct-content-section')
+			]),
+		_List_fromArray(
+			[
+				$author$project$ForceDirectedGraph$viewGraph(
+				$author$project$ForceDirectedGraph$initGraph(
+					$author$project$Main$createGraph(model.structDetails.items))),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('card')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('container')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$h1,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text(
+										$elm$core$String$concat(
+											_List_fromArray(
+												['I checked ', totalLinks, ' links and found ', brokenLinks, ' links that were broken'])))
+									]))
+							]))
+					]))
+			]));
 };
 var $author$project$Main$viewStructure = function (model) {
 	return A2(
@@ -12392,23 +12401,12 @@ var $author$project$Main$view = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$Attributes$class('urlInput'),
-								$elm$html$Html$Attributes$placeholder(''),
+								$elm$html$Html$Attributes$placeholder('https://'),
 								$elm$html$Html$Attributes$type_('text'),
 								$elm$html$Html$Attributes$value(model.input),
 								$elm$html$Html$Events$onInput($author$project$Main$UrlChange)
 							]),
 						_List_Nil),
-						A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('startButton'),
-								$elm$html$Html$Events$onClick($author$project$Main$ClickCheckWebsite)
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Check')
-							])),
 						A2(
 						$elm$html$Html$img,
 						_List_fromArray(
@@ -12422,7 +12420,18 @@ var $author$project$Main$view = function (model) {
 				$author$project$Main$viewDomain(model),
 				$author$project$Main$viewSpeed(model),
 				$author$project$Main$viewStack(model),
-				$author$project$Main$viewStructure(model)
+				$author$project$Main$viewStructure(model),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('startButton'),
+						$elm$html$Html$Events$onClick($author$project$Main$ClickCheckWebsite)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Check')
+					]))
 			]));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(

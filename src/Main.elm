@@ -440,10 +440,8 @@ view : Model -> Html Msg
 view model =
     div [ class "main-section" ]
         [ div [ class "header" ]
-            [ input [ class "urlInput", placeholder "", type_ "text", value model.input, onInput UrlChange ]
+            [ input [ class "urlInput", placeholder "https://", type_ "text", value model.input, onInput UrlChange ]
                 []
-            , button [ class "startButton", onClick ClickCheckWebsite ]
-                [ text "Check" ]
             , img [ alt "Image", src "../images/github.svg" ]
                 []
             ]
@@ -452,6 +450,8 @@ view model =
         , viewSpeed model
         , viewStack model
         , viewStructure model
+        , button [ class "startButton", onClick ClickCheckWebsite ]
+            [ text "Check" ]
         ]
 
 
@@ -495,10 +495,8 @@ viewExpandDomain model =
             [ img [ alt "Image", src "../images/persons-solid.svg" ]
                 []
             , div [ class "container" ]
-                [ h2 []
-                    [ b []
-                        [ text "Organization" ]
-                    ]
+                [ h1 []
+                    [ text "Organization" ]
                 , p []
                     [ text model.domainOwnershipDetails.organization ]
                 ]
@@ -507,10 +505,8 @@ viewExpandDomain model =
             [ img [ alt "Image", src "../images/map-solid.svg" ]
                 []
             , div [ class "container" ]
-                [ h2 []
-                    [ b []
-                        [ text "State" ]
-                    ]
+                [ h1 []
+                    [ text "State" ]
                 , p []
                     [ text model.domainOwnershipDetails.state ]
                 ]
@@ -519,10 +515,8 @@ viewExpandDomain model =
             [ img [ alt "Image", src "../images/globe-solid.svg" ]
                 []
             , div [ class "container" ]
-                [ h2 []
-                    [ b []
-                        [ text "Country" ]
-                    ]
+                [ h1 []
+                    [ text "Country" ]
                 , p []
                     [ text model.domainOwnershipDetails.country ]
                 ]
@@ -570,10 +564,8 @@ viewExpandSpeed model =
             [ img [ alt "Image", src "../images/server-solid.svg" ]
                 []
             , div [ class "container" ]
-                [ h2 []
-                    [ b []
-                        [ text "Server Responstime" ]
-                    ]
+                [ h1 []
+                    [ text "Server Responstime" ]
                 , p []
                     [ text (String.concat [ R.round 2 (model.speedDetails.serverResponseTime / 1000), " Sekunden" ]) ]
                 ]
@@ -582,10 +574,8 @@ viewExpandSpeed model =
             [ img [ alt "Image", src "../images/paint-brush-solid.svg" ]
                 []
             , div [ class "container" ]
-                [ h2 []
-                    [ b []
-                        [ text "Time untill first content is drawn" ]
-                    ]
+                [ h1 []
+                    [ text "Time untill first content is drawn" ]
                 , p []
                     [ text (String.concat [ R.round 2 (model.speedDetails.firstContentfulPaint / 1000), " Sekunden" ]) ]
                 ]
@@ -594,10 +584,8 @@ viewExpandSpeed model =
             [ img [ alt "Image", src "../images/mouse-solid.svg" ]
                 []
             , div [ class "container" ]
-                [ h2 []
-                    [ b []
-                        [ text "Time untill site is interactive" ]
-                    ]
+                [ h1 []
+                    [ text "Time untill site is interactive" ]
                 , p []
                     [ text (String.concat [ R.round 2 (model.speedDetails.timeToInteractive / 1000), " Sekunden" ]) ]
                 ]
@@ -708,7 +696,23 @@ viewStructure model =
 
 viewExpandStruct : Model -> Html Msg
 viewExpandStruct model =
-    FDG.initGraph (createGraph model.structDetails.items) |> FDG.viewGraph
+    let
+        totalLinks =
+            String.fromInt (List.length model.structDetails.items)
+
+        brokenLinks =
+            String.fromInt (List.length (model.structDetails.items |> List.filter (\record -> record.status /= 200)))
+    in
+    div [ class "struct-content-section" ]
+        [ FDG.initGraph (createGraph model.structDetails.items) |> FDG.viewGraph
+        , div [ class "card" ]
+            [ div [ class "container" ]
+                [ h1 []
+                    [ text (String.concat [ "I checked ", totalLinks, " links and found ", brokenLinks, " links that were broken" ])
+                    ]
+                ]
+            ]
+        ]
 
 
 
