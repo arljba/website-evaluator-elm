@@ -210,9 +210,19 @@ input[type="text"] {
 }
 
 .domain-content-section {
-	padding: 0 18px;
-	overflow: hidden;
-	background-color: #FBFCFF;
+	margin-top: 30px;
+	display: flex;
+	flex-wrap: wrap;
+	text-align: center;
+}
+
+.domain-content-section img{
+	width: 25%;
+	height: 25%;
+}
+
+.domain-content-section .card{
+	width: 25%;
 }
 
 .speed-content-section {

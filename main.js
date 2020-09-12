@@ -9487,7 +9487,17 @@ var $author$project$Main$renderIf = F2(
 		return shouldRender ? elem : $author$project$Main$empty;
 	});
 var $elm$html$Html$span = _VirtualDom_node('span');
+var $elm$html$Html$Attributes$alt = $elm$html$Html$Attributes$stringProperty('alt');
+var $elm$html$Html$b = _VirtualDom_node('b');
+var $elm$html$Html$h2 = _VirtualDom_node('h2');
+var $elm$html$Html$img = _VirtualDom_node('img');
 var $elm$html$Html$p = _VirtualDom_node('p');
+var $elm$html$Html$Attributes$src = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'src',
+		_VirtualDom_noJavaScriptOrHtmlUri(url));
+};
 var $author$project$Main$viewExpandDomain = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -9498,34 +9508,142 @@ var $author$project$Main$viewExpandDomain = function (model) {
 		_List_fromArray(
 			[
 				A2(
-				$elm$html$Html$p,
-				_List_Nil,
+				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						$elm$html$Html$text(
-						$elm$core$String$concat(
-							_List_fromArray(
-								['Organization: ', model.domainOwnershipDetails.organization])))
+						$elm$html$Html$Attributes$class('card')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$img,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$alt('Image'),
+								$elm$html$Html$Attributes$src('../images/persons-solid.svg')
+							]),
+						_List_Nil),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('container')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$h2,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$b,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$elm$html$Html$text('Organization')
+											]))
+									])),
+								A2(
+								$elm$html$Html$p,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text(model.domainOwnershipDetails.organization)
+									]))
+							]))
 					])),
 				A2(
-				$elm$html$Html$p,
-				_List_Nil,
+				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						$elm$html$Html$text(
-						$elm$core$String$concat(
-							_List_fromArray(
-								['State: ', model.domainOwnershipDetails.state])))
+						$elm$html$Html$Attributes$class('card')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$img,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$alt('Image'),
+								$elm$html$Html$Attributes$src('../images/map-solid.svg')
+							]),
+						_List_Nil),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('container')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$h2,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$b,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$elm$html$Html$text('State')
+											]))
+									])),
+								A2(
+								$elm$html$Html$p,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text(model.domainOwnershipDetails.state)
+									]))
+							]))
 					])),
 				A2(
-				$elm$html$Html$p,
-				_List_Nil,
+				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						$elm$html$Html$text(
-						$elm$core$String$concat(
-							_List_fromArray(
-								['Country: ', model.domainOwnershipDetails.country])))
+						$elm$html$Html$Attributes$class('card')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$img,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$alt('Image'),
+								$elm$html$Html$Attributes$src('../images/globe-solid.svg')
+							]),
+						_List_Nil),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('container')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$h2,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$b,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$elm$html$Html$text('Country')
+											]))
+									])),
+								A2(
+								$elm$html$Html$p,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text(model.domainOwnershipDetails.country)
+									]))
+							]))
 					]))
 			]));
 };
@@ -9868,10 +9986,6 @@ var $author$project$Main$viewSelection = function (model) {
 };
 var $author$project$Main$ExpandSpeedContent = {$: 'ExpandSpeedContent'};
 var $author$project$Main$TargetSpeed = {$: 'TargetSpeed'};
-var $elm$html$Html$Attributes$alt = $elm$html$Html$Attributes$stringProperty('alt');
-var $elm$html$Html$b = _VirtualDom_node('b');
-var $elm$html$Html$h2 = _VirtualDom_node('h2');
-var $elm$html$Html$img = _VirtualDom_node('img');
 var $elm$core$Basics$ge = _Utils_ge;
 var $elm$core$Basics$abs = function (n) {
 	return (n < 0) ? (-n) : n;
@@ -10109,12 +10223,6 @@ var $myrho$elm_round$Round$round = $myrho$elm_round$Round$roundFun(
 				}
 			}
 		}));
-var $elm$html$Html$Attributes$src = function (url) {
-	return A2(
-		$elm$html$Html$Attributes$stringProperty,
-		'src',
-		_VirtualDom_noJavaScriptOrHtmlUri(url));
-};
 var $author$project$Main$viewExpandSpeed = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -10136,7 +10244,7 @@ var $author$project$Main$viewExpandSpeed = function (model) {
 						$elm$html$Html$img,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$alt('Server'),
+								$elm$html$Html$Attributes$alt('Image'),
 								$elm$html$Html$Attributes$src('../images/server-solid.svg')
 							]),
 						_List_Nil),
@@ -10188,7 +10296,7 @@ var $author$project$Main$viewExpandSpeed = function (model) {
 						$elm$html$Html$img,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$alt('Time untill first content is rendered'),
+								$elm$html$Html$Attributes$alt('Image'),
 								$elm$html$Html$Attributes$src('../images/paint-brush-solid.svg')
 							]),
 						_List_Nil),
@@ -10240,7 +10348,7 @@ var $author$project$Main$viewExpandSpeed = function (model) {
 						$elm$html$Html$img,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$alt('Avatar'),
+								$elm$html$Html$Attributes$alt('Image'),
 								$elm$html$Html$Attributes$src('../images/mouse-solid.svg')
 							]),
 						_List_Nil),
