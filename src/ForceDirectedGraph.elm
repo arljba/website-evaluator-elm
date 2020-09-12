@@ -18,7 +18,7 @@ width =
 
 height : Float
 height =
-    200
+    700
 
 
 color : Color

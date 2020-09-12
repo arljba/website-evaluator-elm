@@ -26,7 +26,6 @@ import Xml.Decode as X
 type alias Model =
     { input : String
     , websiteUrl : Maybe Url
-    , position : ( Int, Int )
     , speedDetails : SpeedDetails
     , domainOwnershipDetails : DomainOwnershipDetails
     , stackDetails : StackDetails
@@ -48,7 +47,6 @@ initialModel : Model
 initialModel =
     { input = ""
     , websiteUrl = Nothing
-    , position = ( 0, 0 )
     , speedDetails = SpeedDetails 0 0 0
     , domainOwnershipDetails = DomainOwnershipDetails "" "" ""
     , stackDetails = StackDetails []
@@ -444,13 +442,12 @@ view model =
         [ div [ class "header" ]
             [ input [ class "urlInput", placeholder "", type_ "text", value model.input, onInput UrlChange ]
                 []
-            , label []
-                [ text "http://" ]
             , button [ class "startButton", onClick ClickCheckWebsite ]
                 [ text "Check" ]
-            , viewSelection model
+            , img [ alt "Image", src "../images/github.svg" ]
+                []
             ]
-        , viewInfo model
+        , viewInfo
         , viewDomain model
         , viewSpeed model
         , viewStack model
@@ -652,8 +649,8 @@ viewExpandStack model =
         ]
 
 
-viewInfo : Model -> Html Msg
-viewInfo model =
+viewInfo : Html Msg
+viewInfo =
     div [ class "dashbord dashbord-info" ]
         [ div [ class "detail-section" ]
             [ div [ class "head-general-info" ]
@@ -712,12 +709,6 @@ viewStructure model =
 viewExpandStruct : Model -> Html Msg
 viewExpandStruct model =
     FDG.initGraph (createGraph model.structDetails.items) |> FDG.viewGraph
-
-
-viewSelection : Model -> Html Msg
-viewSelection model =
-    div [ class "selection-section" ]
-        []
 
 
 
