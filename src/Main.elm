@@ -5,17 +5,17 @@ module Main exposing (..)
 import Array exposing (append)
 import Browser
 import Browser.Events as Events exposing (Visibility(..))
-import Debug as T
 import Dict exposing (Dict)
 import Draggable
 import ForceDirectedGraph as FDG
 import Graph exposing (Edge, Graph, Node, NodeId)
-import Html exposing (Html, a, br, button, div, h1, h2, hr, i, input, label, li, option, p, select, small, span, text, ul)
+import Html exposing (Html, a, b, br, button, div, h1, h2, hr, i, img, input, label, li, option, p, select, small, span, text, ul)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onCheck, onClick, onInput)
 import Http exposing (Header, emptyBody)
 import Http.Xml
 import Json.Decode as D
+import Round as R
 import Url as U exposing (Url)
 import Xml.Decode as X
 
@@ -35,6 +35,7 @@ type alias Model =
     , structDetails : StructureDetails
     , isValid : Bool
     , showDomainDetails : Bool
+    , showSpeedDetails : Bool
     , showStackDetails : Bool
     , showStructDetails : Bool
     , apiSelection : ApiSelection
@@ -51,12 +52,13 @@ initialModel =
     , websiteUrl = Nothing
     , position = ( 0, 0 )
     , drag = Draggable.init
-    , speedDetails = SpeedDetails "" ""
+    , speedDetails = SpeedDetails 0 0 0
     , domainOwnershipDetails = DomainOwnershipDetails "" "" ""
     , stackDetails = StackDetails []
     , structDetails = StructureDetails []
     , isValid = False
     , showDomainDetails = False
+    , showSpeedDetails = False
     , showStackDetails = False
     , showStructDetails = False
     , apiSelection = ApiSelection False False False False False
@@ -86,6 +88,7 @@ type Msg
     | GotStructure (Result Http.Error StructureDetails)
     | UrlChange String
     | ExpandDomainContent
+    | ExpandSpeedContent
     | ExpandStackContent
     | ExpandStructContent
     | ApiSelectionChange Target Bool
@@ -99,6 +102,9 @@ update msg model =
 
         ExpandDomainContent ->
             ( { model | showDomainDetails = not model.showDomainDetails }, Cmd.none )
+
+        ExpandSpeedContent ->
+            ( { model | showSpeedDetails = not model.showSpeedDetails }, Cmd.none )
 
         ExpandStackContent ->
             ( { model | showStackDetails = not model.showStackDetails }, Cmd.none )
@@ -136,7 +142,7 @@ update msg model =
         GotSpeed result ->
             case result of
                 Ok details ->
-                    ( { model | speedStatus = "Sucess", speedDetails = SpeedDetails details.timeToInteractive details.firstContentfulPaint }, Cmd.none )
+                    ( { model | speedStatus = "Sucess", speedDetails = SpeedDetails details.timeToInteractive details.firstContentfulPaint details.serverResponseTime }, Cmd.none )
 
                 Err err ->
                     ( { model | speedStatus = "Error" }, Cmd.none )
@@ -174,8 +180,9 @@ update msg model =
 
 
 type alias SpeedDetails =
-    { timeToInteractive : String
-    , firstContentfulPaint : String
+    { timeToInteractive : Float
+    , firstContentfulPaint : Float
+    , serverResponseTime : Float
     }
 
 
@@ -270,8 +277,44 @@ dragConfig =
 
 renderSpeedDetails : SpeedDetails -> Html Msg
 renderSpeedDetails sd =
-    div [ class "output" ]
-        [ text (String.concat [ "Time until interactive: ", sd.timeToInteractive, "First element loaded in: ", sd.firstContentfulPaint ]) ]
+    div [ class "speed-content-section" ]
+        [ div [ class "card" ]
+            [ img [ alt "Server", src "../images/server-solid.svg" ]
+                []
+            , div [ class "container" ]
+                [ h2 []
+                    [ b []
+                        [ text "Server Responstime" ]
+                    ]
+                , p []
+                    [ text (String.concat [ String.fromFloat (sd.serverResponseTime / 1000), " Sekunden" ]) ]
+                ]
+            ]
+        , div [ class "card" ]
+            [ img [ alt "Time untill first content is rendered", src "../images/paint-brush-solid.svg" ]
+                []
+            , div [ class "container" ]
+                [ h2 []
+                    [ b []
+                        [ text "Time untill first content is drawn" ]
+                    ]
+                , p []
+                    [ text (String.concat [ String.fromFloat (sd.firstContentfulPaint / 1000), " Sekunden" ]) ]
+                ]
+            ]
+        , div [ class "card" ]
+            [ img [ alt "Avatar", src "../images/mouse-solid.svg" ]
+                []
+            , div [ class "container" ]
+                [ h2 []
+                    [ b []
+                        [ text "Time untill site is interactive" ]
+                    ]
+                , p []
+                    [ text "Architect & Engineer" ]
+                ]
+            ]
+        ]
 
 
 renderDomainDetails : DomainOwnershipDetails -> Html Msg
@@ -282,9 +325,10 @@ renderDomainDetails dod =
 
 gpstDecoder : D.Decoder SpeedDetails
 gpstDecoder =
-    D.map2 SpeedDetails
-        (D.field "lighthouseResult" (D.field "audits" (D.field "interactive" (D.field "displayValue" D.string))))
-        (D.field "lighthouseResult" (D.field "audits" (D.field "first-contentful-paint" (D.field "displayValue" D.string))))
+    D.map3 SpeedDetails
+        (D.field "lighthouseResult" (D.field "audits" (D.field "interactive" (D.field "numericValue" D.float))))
+        (D.field "lighthouseResult" (D.field "audits" (D.field "first-contentful-paint" (D.field "numericValue" D.float))))
+        (D.field "lighthouseResult" (D.field "audits" (D.field "server-response-time" (D.field "numericValue" D.float))))
 
 
 wixDecoder : X.Decoder DomainOwnershipDetails
@@ -612,12 +656,55 @@ viewSpeed model =
                     [ text model.speedStatus ]
                 ]
             , div [ class "expand-item" ]
-                [ a [ class "arrowButton" ]
+                [ a [ class "arrowButton", onClick ExpandSpeedContent ]
                     [ span [ class "leftSide" ]
                         []
                     , span [ class "rightSide" ]
                         []
                     ]
+                ]
+            ]
+        , viewExpandSpeed model |> renderIf model.showSpeedDetails
+        ]
+
+
+viewExpandSpeed : Model -> Html Msg
+viewExpandSpeed model =
+    div [ class "speed-content-section" ]
+        [ div [ class "card" ]
+            [ img [ alt "Server", src "../images/server-solid.svg" ]
+                []
+            , div [ class "container" ]
+                [ h2 []
+                    [ b []
+                        [ text "Server Responstime" ]
+                    ]
+                , p []
+                    [ text (String.concat [ R.round 2 (model.speedDetails.serverResponseTime / 1000), " Sekunden" ]) ]
+                ]
+            ]
+        , div [ class "card" ]
+            [ img [ alt "Time untill first content is rendered", src "../images/paint-brush-solid.svg" ]
+                []
+            , div [ class "container" ]
+                [ h2 []
+                    [ b []
+                        [ text "Time untill first content is drawn" ]
+                    ]
+                , p []
+                    [ text (String.concat [ R.round 2 (model.speedDetails.firstContentfulPaint / 1000), " Sekunden" ]) ]
+                ]
+            ]
+        , div [ class "card" ]
+            [ img [ alt "Avatar", src "../images/mouse-solid.svg" ]
+                []
+            , div [ class "container" ]
+                [ h2 []
+                    [ b []
+                        [ text "Time untill site is interactive" ]
+                    ]
+                , p []
+                    [ text (String.concat [ R.round 2 (model.speedDetails.timeToInteractive / 1000), " Sekunden" ]) ]
                 ]
             ]
         ]

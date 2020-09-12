@@ -173,8 +173,8 @@ input[type="text"] {
 
 .arrowButton {
 	background-color: white;
-	height: 2.8px;
-	width: 2.8px;
+	height: 8px;
+	width: 8px;
 	display: block;
 	padding: 0.5px;
 	margin: 1px auto;
@@ -213,6 +213,22 @@ input[type="text"] {
 	padding: 0 18px;
 	overflow: hidden;
 	background-color: #FBFCFF;
+}
+
+.speed-content-section {
+	margin-top: 30px;
+	display: flex;
+	flex-wrap: wrap;
+	text-align: center;
+}
+
+.speed-content-section img{
+	width: 25%;
+	height: 25%;
+}
+
+.speed-content-section .card{
+	width: 25%;
 }
 
 .switch {
