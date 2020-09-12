@@ -75,6 +75,7 @@ init _ =
 
 type Msg
     = ClickCheckWebsite
+    | ClearModel
     | GotSpeed (Result Http.Error SpeedDetails)
     | GotDomain (Result Http.Error DomainOwnershipDetails)
     | GotStack (Result Http.Error StackDetails)
@@ -92,6 +93,9 @@ update msg model =
     case msg of
         ClickCheckWebsite ->
             ( model, Cmd.batch [ fetchFromWhoIsXML model model.websiteUrl, fetchFromGooglePageSpeedTest model model.websiteUrl, fetchFromBuiltwith model model.websiteUrl, fetchFromCrawler model model.websiteUrl ] )
+
+        ClearModel ->
+            ( initialModel, Cmd.none )
 
         ExpandDomainContent ->
             ( { model | showDomainDetails = not model.showDomainDetails }, Cmd.none )
@@ -440,8 +444,12 @@ view : Model -> Html Msg
 view model =
     div [ class "main-section" ]
         [ div [ class "header" ]
-            [ input [ class "urlInput", placeholder "https://", type_ "text", value model.input, onInput UrlChange ]
-                []
+            [ div [ class "btn-group" ]
+                [ input [ class "urlInput", placeholder "http://", type_ "text", value model.input, onInput UrlChange ]
+                    []
+                , span [ class "searchclear", onClick ClearModel ]
+                    [ text "X" ]
+                ]
             , img [ alt "Image", src "../images/github.svg" ]
                 []
             ]

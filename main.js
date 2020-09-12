@@ -8750,6 +8750,8 @@ var $author$project$Main$update = F2(
 								A2($author$project$Main$fetchFromBuiltwith, model, model.websiteUrl),
 								A2($author$project$Main$fetchFromCrawler, model, model.websiteUrl)
 							])));
+			case 'ClearModel':
+				return _Utils_Tuple2($author$project$Main$initialModel, $elm$core$Platform$Cmd$none);
 			case 'ExpandDomainContent':
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -8903,6 +8905,7 @@ var $author$project$Main$update = F2(
 				}
 		}
 	});
+var $author$project$Main$ClearModel = {$: 'ClearModel'};
 var $author$project$Main$ClickCheckWebsite = {$: 'ClickCheckWebsite'};
 var $author$project$Main$UrlChange = function (a) {
 	return {$: 'UrlChange', a: a};
@@ -8966,6 +8969,7 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
 };
 var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
+var $elm$html$Html$span = _VirtualDom_node('span');
 var $elm$html$Html$Attributes$src = function (url) {
 	return A2(
 		$elm$html$Html$Attributes$stringProperty,
@@ -9011,7 +9015,6 @@ var $author$project$Main$renderIf = F2(
 	function (shouldRender, elem) {
 		return shouldRender ? elem : $author$project$Main$empty;
 	});
-var $elm$html$Html$span = _VirtualDom_node('span');
 var $elm$html$Html$p = _VirtualDom_node('p');
 var $author$project$Main$viewExpandDomain = function (model) {
 	return A2(
@@ -12397,16 +12400,36 @@ var $author$project$Main$view = function (model) {
 				_List_fromArray(
 					[
 						A2(
-						$elm$html$Html$input,
+						$elm$html$Html$div,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('urlInput'),
-								$elm$html$Html$Attributes$placeholder('https://'),
-								$elm$html$Html$Attributes$type_('text'),
-								$elm$html$Html$Attributes$value(model.input),
-								$elm$html$Html$Events$onInput($author$project$Main$UrlChange)
+								$elm$html$Html$Attributes$class('btn-group')
 							]),
-						_List_Nil),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$input,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('urlInput'),
+										$elm$html$Html$Attributes$placeholder('http://'),
+										$elm$html$Html$Attributes$type_('text'),
+										$elm$html$Html$Attributes$value(model.input),
+										$elm$html$Html$Events$onInput($author$project$Main$UrlChange)
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$span,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('searchclear'),
+										$elm$html$Html$Events$onClick($author$project$Main$ClearModel)
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('X')
+									]))
+							])),
 						A2(
 						$elm$html$Html$img,
 						_List_fromArray(
