@@ -5504,16 +5504,10 @@ var $author$project$Main$StackDetails = function (technologies) {
 var $author$project$Main$StructureDetails = function (items) {
 	return {items: items};
 };
-var $zaboco$elm_draggable$Internal$NotDragging = {$: 'NotDragging'};
-var $zaboco$elm_draggable$Draggable$State = function (a) {
-	return {$: 'State', a: a};
-};
-var $zaboco$elm_draggable$Draggable$init = $zaboco$elm_draggable$Draggable$State($zaboco$elm_draggable$Internal$NotDragging);
 var $author$project$Main$initialModel = {
 	apiSelection: A4($author$project$Main$ApiSelection, false, false, false, false),
 	domainOwnershipDetails: A3($author$project$Main$DomainOwnershipDetails, '', '', ''),
 	domainStatus: 'Not Started',
-	drag: $zaboco$elm_draggable$Draggable$init,
 	input: '',
 	isValid: false,
 	position: _Utils_Tuple2(0, 0),
@@ -5534,53 +5528,79 @@ var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2($author$project$Main$initialModel, $elm$core$Platform$Cmd$none);
 };
-var $author$project$Main$DragMsg = function (a) {
-	return {$: 'DragMsg', a: a};
-};
-var $zaboco$elm_draggable$Internal$DragAt = function (a) {
-	return {$: 'DragAt', a: a};
-};
-var $zaboco$elm_draggable$Draggable$Msg = function (a) {
-	return {$: 'Msg', a: a};
-};
-var $zaboco$elm_draggable$Internal$StopDragging = {$: 'StopDragging'};
 var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$core$Basics$composeL = F3(
-	function (g, f, x) {
-		return g(
-			f(x));
-	});
-var $elm$core$Platform$Sub$map = _Platform_map;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $elm$browser$Browser$Events$Document = {$: 'Document'};
-var $elm$browser$Browser$Events$MySub = F3(
-	function (a, b, c) {
-		return {$: 'MySub', a: a, b: b, c: c};
+var $author$project$Main$subscriptions = function (model) {
+	return $elm$core$Platform$Sub$none;
+};
+var $author$project$Main$GotStack = function (a) {
+	return {$: 'GotStack', a: a};
+};
+var $elm$core$String$concat = function (strings) {
+	return A2($elm$core$String$join, '', strings);
+};
+var $elm$json$Json$Decode$decodeString = _Json_runOnString;
+var $elm$http$Http$BadStatus_ = F2(
+	function (a, b) {
+		return {$: 'BadStatus_', a: a, b: b};
 	});
-var $elm$browser$Browser$Events$State = F2(
-	function (subs, pids) {
-		return {pids: pids, subs: subs};
+var $elm$http$Http$BadUrl_ = function (a) {
+	return {$: 'BadUrl_', a: a};
+};
+var $elm$http$Http$GoodStatus_ = F2(
+	function (a, b) {
+		return {$: 'GoodStatus_', a: a, b: b};
 	});
+var $elm$http$Http$NetworkError_ = {$: 'NetworkError_'};
+var $elm$http$Http$Receiving = function (a) {
+	return {$: 'Receiving', a: a};
+};
+var $elm$http$Http$Sending = function (a) {
+	return {$: 'Sending', a: a};
+};
+var $elm$http$Http$Timeout_ = {$: 'Timeout_'};
 var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
-var $elm$browser$Browser$Events$init = $elm$core$Task$succeed(
-	A2($elm$browser$Browser$Events$State, _List_Nil, $elm$core$Dict$empty));
-var $elm$browser$Browser$Events$nodeToKey = function (node) {
-	if (node.$ === 'Document') {
-		return 'd_';
+var $elm$core$Maybe$isJust = function (maybe) {
+	if (maybe.$ === 'Just') {
+		return true;
 	} else {
-		return 'w_';
+		return false;
 	}
 };
-var $elm$browser$Browser$Events$addKey = function (sub) {
-	var node = sub.a;
-	var name = sub.b;
-	return _Utils_Tuple2(
-		_Utils_ap(
-			$elm$browser$Browser$Events$nodeToKey(node),
-			name),
-		sub);
-};
+var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
+var $elm$core$Basics$compare = _Utils_compare;
+var $elm$core$Dict$get = F2(
+	function (targetKey, dict) {
+		get:
+		while (true) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var key = dict.b;
+				var value = dict.c;
+				var left = dict.d;
+				var right = dict.e;
+				var _v1 = A2($elm$core$Basics$compare, targetKey, key);
+				switch (_v1.$) {
+					case 'LT':
+						var $temp$targetKey = targetKey,
+							$temp$dict = left;
+						targetKey = $temp$targetKey;
+						dict = $temp$dict;
+						continue get;
+					case 'EQ':
+						return $elm$core$Maybe$Just(value);
+					default:
+						var $temp$targetKey = targetKey,
+							$temp$dict = right;
+						targetKey = $temp$targetKey;
+						dict = $temp$dict;
+						continue get;
+				}
+			}
+		}
+	});
 var $elm$core$Dict$Black = {$: 'Black'};
 var $elm$core$Dict$RBNode_elm_builtin = F5(
 	function (a, b, c, d, e) {
@@ -5641,7 +5661,6 @@ var $elm$core$Dict$balance = F5(
 			}
 		}
 	});
-var $elm$core$Basics$compare = _Utils_compare;
 var $elm$core$Dict$insertHelp = F3(
 	function (key, value, dict) {
 		if (dict.$ === 'RBEmpty_elm_builtin') {
@@ -5688,405 +5707,6 @@ var $elm$core$Dict$insert = F3(
 		} else {
 			var x = _v0;
 			return x;
-		}
-	});
-var $elm$core$Dict$fromList = function (assocs) {
-	return A3(
-		$elm$core$List$foldl,
-		F2(
-			function (_v0, dict) {
-				var key = _v0.a;
-				var value = _v0.b;
-				return A3($elm$core$Dict$insert, key, value, dict);
-			}),
-		$elm$core$Dict$empty,
-		assocs);
-};
-var $elm$core$Process$kill = _Scheduler_kill;
-var $elm$core$Dict$foldl = F3(
-	function (func, acc, dict) {
-		foldl:
-		while (true) {
-			if (dict.$ === 'RBEmpty_elm_builtin') {
-				return acc;
-			} else {
-				var key = dict.b;
-				var value = dict.c;
-				var left = dict.d;
-				var right = dict.e;
-				var $temp$func = func,
-					$temp$acc = A3(
-					func,
-					key,
-					value,
-					A3($elm$core$Dict$foldl, func, acc, left)),
-					$temp$dict = right;
-				func = $temp$func;
-				acc = $temp$acc;
-				dict = $temp$dict;
-				continue foldl;
-			}
-		}
-	});
-var $elm$core$Dict$merge = F6(
-	function (leftStep, bothStep, rightStep, leftDict, rightDict, initialResult) {
-		var stepState = F3(
-			function (rKey, rValue, _v0) {
-				stepState:
-				while (true) {
-					var list = _v0.a;
-					var result = _v0.b;
-					if (!list.b) {
-						return _Utils_Tuple2(
-							list,
-							A3(rightStep, rKey, rValue, result));
-					} else {
-						var _v2 = list.a;
-						var lKey = _v2.a;
-						var lValue = _v2.b;
-						var rest = list.b;
-						if (_Utils_cmp(lKey, rKey) < 0) {
-							var $temp$rKey = rKey,
-								$temp$rValue = rValue,
-								$temp$_v0 = _Utils_Tuple2(
-								rest,
-								A3(leftStep, lKey, lValue, result));
-							rKey = $temp$rKey;
-							rValue = $temp$rValue;
-							_v0 = $temp$_v0;
-							continue stepState;
-						} else {
-							if (_Utils_cmp(lKey, rKey) > 0) {
-								return _Utils_Tuple2(
-									list,
-									A3(rightStep, rKey, rValue, result));
-							} else {
-								return _Utils_Tuple2(
-									rest,
-									A4(bothStep, lKey, lValue, rValue, result));
-							}
-						}
-					}
-				}
-			});
-		var _v3 = A3(
-			$elm$core$Dict$foldl,
-			stepState,
-			_Utils_Tuple2(
-				$elm$core$Dict$toList(leftDict),
-				initialResult),
-			rightDict);
-		var leftovers = _v3.a;
-		var intermediateResult = _v3.b;
-		return A3(
-			$elm$core$List$foldl,
-			F2(
-				function (_v4, result) {
-					var k = _v4.a;
-					var v = _v4.b;
-					return A3(leftStep, k, v, result);
-				}),
-			intermediateResult,
-			leftovers);
-	});
-var $elm$browser$Browser$Events$Event = F2(
-	function (key, event) {
-		return {event: event, key: key};
-	});
-var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
-var $elm$browser$Browser$Events$spawn = F3(
-	function (router, key, _v0) {
-		var node = _v0.a;
-		var name = _v0.b;
-		var actualNode = function () {
-			if (node.$ === 'Document') {
-				return _Browser_doc;
-			} else {
-				return _Browser_window;
-			}
-		}();
-		return A2(
-			$elm$core$Task$map,
-			function (value) {
-				return _Utils_Tuple2(key, value);
-			},
-			A3(
-				_Browser_on,
-				actualNode,
-				name,
-				function (event) {
-					return A2(
-						$elm$core$Platform$sendToSelf,
-						router,
-						A2($elm$browser$Browser$Events$Event, key, event));
-				}));
-	});
-var $elm$core$Dict$union = F2(
-	function (t1, t2) {
-		return A3($elm$core$Dict$foldl, $elm$core$Dict$insert, t2, t1);
-	});
-var $elm$browser$Browser$Events$onEffects = F3(
-	function (router, subs, state) {
-		var stepRight = F3(
-			function (key, sub, _v6) {
-				var deads = _v6.a;
-				var lives = _v6.b;
-				var news = _v6.c;
-				return _Utils_Tuple3(
-					deads,
-					lives,
-					A2(
-						$elm$core$List$cons,
-						A3($elm$browser$Browser$Events$spawn, router, key, sub),
-						news));
-			});
-		var stepLeft = F3(
-			function (_v4, pid, _v5) {
-				var deads = _v5.a;
-				var lives = _v5.b;
-				var news = _v5.c;
-				return _Utils_Tuple3(
-					A2($elm$core$List$cons, pid, deads),
-					lives,
-					news);
-			});
-		var stepBoth = F4(
-			function (key, pid, _v2, _v3) {
-				var deads = _v3.a;
-				var lives = _v3.b;
-				var news = _v3.c;
-				return _Utils_Tuple3(
-					deads,
-					A3($elm$core$Dict$insert, key, pid, lives),
-					news);
-			});
-		var newSubs = A2($elm$core$List$map, $elm$browser$Browser$Events$addKey, subs);
-		var _v0 = A6(
-			$elm$core$Dict$merge,
-			stepLeft,
-			stepBoth,
-			stepRight,
-			state.pids,
-			$elm$core$Dict$fromList(newSubs),
-			_Utils_Tuple3(_List_Nil, $elm$core$Dict$empty, _List_Nil));
-		var deadPids = _v0.a;
-		var livePids = _v0.b;
-		var makeNewPids = _v0.c;
-		return A2(
-			$elm$core$Task$andThen,
-			function (pids) {
-				return $elm$core$Task$succeed(
-					A2(
-						$elm$browser$Browser$Events$State,
-						newSubs,
-						A2(
-							$elm$core$Dict$union,
-							livePids,
-							$elm$core$Dict$fromList(pids))));
-			},
-			A2(
-				$elm$core$Task$andThen,
-				function (_v1) {
-					return $elm$core$Task$sequence(makeNewPids);
-				},
-				$elm$core$Task$sequence(
-					A2($elm$core$List$map, $elm$core$Process$kill, deadPids))));
-	});
-var $elm$core$List$maybeCons = F3(
-	function (f, mx, xs) {
-		var _v0 = f(mx);
-		if (_v0.$ === 'Just') {
-			var x = _v0.a;
-			return A2($elm$core$List$cons, x, xs);
-		} else {
-			return xs;
-		}
-	});
-var $elm$core$List$filterMap = F2(
-	function (f, xs) {
-		return A3(
-			$elm$core$List$foldr,
-			$elm$core$List$maybeCons(f),
-			_List_Nil,
-			xs);
-	});
-var $elm$browser$Browser$Events$onSelfMsg = F3(
-	function (router, _v0, state) {
-		var key = _v0.key;
-		var event = _v0.event;
-		var toMessage = function (_v2) {
-			var subKey = _v2.a;
-			var _v3 = _v2.b;
-			var node = _v3.a;
-			var name = _v3.b;
-			var decoder = _v3.c;
-			return _Utils_eq(subKey, key) ? A2(_Browser_decodeEvent, decoder, event) : $elm$core$Maybe$Nothing;
-		};
-		var messages = A2($elm$core$List$filterMap, toMessage, state.subs);
-		return A2(
-			$elm$core$Task$andThen,
-			function (_v1) {
-				return $elm$core$Task$succeed(state);
-			},
-			$elm$core$Task$sequence(
-				A2(
-					$elm$core$List$map,
-					$elm$core$Platform$sendToApp(router),
-					messages)));
-	});
-var $elm$browser$Browser$Events$subMap = F2(
-	function (func, _v0) {
-		var node = _v0.a;
-		var name = _v0.b;
-		var decoder = _v0.c;
-		return A3(
-			$elm$browser$Browser$Events$MySub,
-			node,
-			name,
-			A2($elm$json$Json$Decode$map, func, decoder));
-	});
-_Platform_effectManagers['Browser.Events'] = _Platform_createManager($elm$browser$Browser$Events$init, $elm$browser$Browser$Events$onEffects, $elm$browser$Browser$Events$onSelfMsg, 0, $elm$browser$Browser$Events$subMap);
-var $elm$browser$Browser$Events$subscription = _Platform_leaf('Browser.Events');
-var $elm$browser$Browser$Events$on = F3(
-	function (node, name, decoder) {
-		return $elm$browser$Browser$Events$subscription(
-			A3($elm$browser$Browser$Events$MySub, node, name, decoder));
-	});
-var $elm$browser$Browser$Events$onMouseMove = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'mousemove');
-var $elm$browser$Browser$Events$onMouseUp = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'mouseup');
-var $zaboco$elm_draggable$Internal$Position = F2(
-	function (x, y) {
-		return {x: x, y: y};
-	});
-var $elm$json$Json$Decode$field = _Json_decodeField;
-var $elm$json$Json$Decode$float = _Json_decodeFloat;
-var $elm$core$Basics$truncate = _Basics_truncate;
-var $zaboco$elm_draggable$Draggable$positionDecoder = A3(
-	$elm$json$Json$Decode$map2,
-	$zaboco$elm_draggable$Internal$Position,
-	A2(
-		$elm$json$Json$Decode$map,
-		$elm$core$Basics$truncate,
-		A2($elm$json$Json$Decode$field, 'pageX', $elm$json$Json$Decode$float)),
-	A2(
-		$elm$json$Json$Decode$map,
-		$elm$core$Basics$truncate,
-		A2($elm$json$Json$Decode$field, 'pageY', $elm$json$Json$Decode$float)));
-var $zaboco$elm_draggable$Draggable$subscriptions = F2(
-	function (envelope, _v0) {
-		var drag = _v0.a;
-		if (drag.$ === 'NotDragging') {
-			return $elm$core$Platform$Sub$none;
-		} else {
-			return A2(
-				$elm$core$Platform$Sub$map,
-				A2($elm$core$Basics$composeL, envelope, $zaboco$elm_draggable$Draggable$Msg),
-				$elm$core$Platform$Sub$batch(
-					_List_fromArray(
-						[
-							$elm$browser$Browser$Events$onMouseMove(
-							A2($elm$json$Json$Decode$map, $zaboco$elm_draggable$Internal$DragAt, $zaboco$elm_draggable$Draggable$positionDecoder)),
-							$elm$browser$Browser$Events$onMouseUp(
-							$elm$json$Json$Decode$succeed($zaboco$elm_draggable$Internal$StopDragging))
-						])));
-		}
-	});
-var $author$project$Main$subscriptions = function (model) {
-	return A2($zaboco$elm_draggable$Draggable$subscriptions, $author$project$Main$DragMsg, model.drag);
-};
-var $author$project$Main$OnDragBy = function (a) {
-	return {$: 'OnDragBy', a: a};
-};
-var $zaboco$elm_draggable$Draggable$Config = function (a) {
-	return {$: 'Config', a: a};
-};
-var $zaboco$elm_draggable$Internal$defaultConfig = {
-	onClick: function (_v0) {
-		return $elm$core$Maybe$Nothing;
-	},
-	onDragBy: function (_v1) {
-		return $elm$core$Maybe$Nothing;
-	},
-	onDragEnd: $elm$core$Maybe$Nothing,
-	onDragStart: function (_v2) {
-		return $elm$core$Maybe$Nothing;
-	},
-	onMouseDown: function (_v3) {
-		return $elm$core$Maybe$Nothing;
-	}
-};
-var $zaboco$elm_draggable$Draggable$basicConfig = function (onDragByListener) {
-	var defaultConfig = $zaboco$elm_draggable$Internal$defaultConfig;
-	return $zaboco$elm_draggable$Draggable$Config(
-		_Utils_update(
-			defaultConfig,
-			{
-				onDragBy: A2($elm$core$Basics$composeL, $elm$core$Maybe$Just, onDragByListener)
-			}));
-};
-var $author$project$Main$dragConfig = $zaboco$elm_draggable$Draggable$basicConfig($author$project$Main$OnDragBy);
-var $author$project$Main$GotStack = function (a) {
-	return {$: 'GotStack', a: a};
-};
-var $elm$core$String$concat = function (strings) {
-	return A2($elm$core$String$join, '', strings);
-};
-var $elm$json$Json$Decode$decodeString = _Json_runOnString;
-var $elm$http$Http$BadStatus_ = F2(
-	function (a, b) {
-		return {$: 'BadStatus_', a: a, b: b};
-	});
-var $elm$http$Http$BadUrl_ = function (a) {
-	return {$: 'BadUrl_', a: a};
-};
-var $elm$http$Http$GoodStatus_ = F2(
-	function (a, b) {
-		return {$: 'GoodStatus_', a: a, b: b};
-	});
-var $elm$http$Http$NetworkError_ = {$: 'NetworkError_'};
-var $elm$http$Http$Receiving = function (a) {
-	return {$: 'Receiving', a: a};
-};
-var $elm$http$Http$Sending = function (a) {
-	return {$: 'Sending', a: a};
-};
-var $elm$http$Http$Timeout_ = {$: 'Timeout_'};
-var $elm$core$Maybe$isJust = function (maybe) {
-	if (maybe.$ === 'Just') {
-		return true;
-	} else {
-		return false;
-	}
-};
-var $elm$core$Dict$get = F2(
-	function (targetKey, dict) {
-		get:
-		while (true) {
-			if (dict.$ === 'RBEmpty_elm_builtin') {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var key = dict.b;
-				var value = dict.c;
-				var left = dict.d;
-				var right = dict.e;
-				var _v1 = A2($elm$core$Basics$compare, targetKey, key);
-				switch (_v1.$) {
-					case 'LT':
-						var $temp$targetKey = targetKey,
-							$temp$dict = left;
-						targetKey = $temp$targetKey;
-						dict = $temp$dict;
-						continue get;
-					case 'EQ':
-						return $elm$core$Maybe$Just(value);
-					default:
-						var $temp$targetKey = targetKey,
-							$temp$dict = right;
-						targetKey = $temp$targetKey;
-						dict = $temp$dict;
-						continue get;
-				}
-			}
 		}
 	});
 var $elm$core$Dict$getMin = function (dict) {
@@ -6533,6 +6153,7 @@ var $elm$http$Http$expectJson = F2(
 						A2($elm$json$Json$Decode$decodeString, decoder, string));
 				}));
 	});
+var $elm$json$Json$Decode$field = _Json_decodeField;
 var $elm$json$Json$Decode$at = F2(
 	function (fields, decoder) {
 		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
@@ -6577,6 +6198,7 @@ var $elm$http$Http$State = F2(
 	});
 var $elm$http$Http$init = $elm$core$Task$succeed(
 	A2($elm$http$Http$State, $elm$core$Dict$empty, _List_Nil));
+var $elm$core$Process$kill = _Scheduler_kill;
 var $elm$core$Process$spawn = _Scheduler_spawn;
 var $elm$http$Http$updateReqs = F3(
 	function (router, cmds, reqs) {
@@ -6647,6 +6269,24 @@ var $elm$http$Http$onEffects = F4(
 					A2($elm$http$Http$State, reqs, subs));
 			},
 			A3($elm$http$Http$updateReqs, router, cmds, state.reqs));
+	});
+var $elm$core$List$maybeCons = F3(
+	function (f, mx, xs) {
+		var _v0 = f(mx);
+		if (_v0.$ === 'Just') {
+			var x = _v0.a;
+			return A2($elm$core$List$cons, x, xs);
+		} else {
+			return xs;
+		}
+	});
+var $elm$core$List$filterMap = F2(
+	function (f, xs) {
+		return A3(
+			$elm$core$List$foldr,
+			$elm$core$List$maybeCons(f),
+			_List_Nil,
+			xs);
 	});
 var $elm$http$Http$maybeSend = F4(
 	function (router, desiredTracker, progress, _v0) {
@@ -6829,6 +6469,7 @@ var $author$project$Main$fetchFromCrawler = F2(
 var $author$project$Main$GotSpeed = function (a) {
 	return {$: 'GotSpeed', a: a};
 };
+var $elm$json$Json$Decode$float = _Json_decodeFloat;
 var $author$project$Main$gpstDecoder = A4(
 	$elm$json$Json$Decode$map3,
 	$author$project$Main$SpeedDetails,
@@ -7731,6 +7372,18 @@ var $jinjor$elm_xml_parser$XmlParser$attributeName = A2(
 		}));
 var $elm$parser$Parser$Problem = function (a) {
 	return {$: 'Problem', a: a};
+};
+var $elm$core$Dict$fromList = function (assocs) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, dict) {
+				var key = _v0.a;
+				var value = _v0.b;
+				return A3($elm$core$Dict$insert, key, value, dict);
+			}),
+		$elm$core$Dict$empty,
+		assocs);
 };
 var $jinjor$elm_xml_parser$XmlParser$entities = $elm$core$Dict$fromList(
 	_List_fromArray(
@@ -9064,7 +8717,6 @@ var $author$project$Main$fetchFromWhoIsXML = F2(
 			return $elm$core$Platform$Cmd$none;
 		}
 	});
-var $elm$core$Basics$round = _Basics_round;
 var $author$project$Main$toggleDomainSelected = function (selection) {
 	return _Utils_update(
 		selection,
@@ -9085,108 +8737,6 @@ var $author$project$Main$toggleStructSelected = function (selection) {
 		selection,
 		{structureSelected: !selection.structureSelected});
 };
-var $zaboco$elm_draggable$Cmd$Extra$message = function (x) {
-	return A2(
-		$elm$core$Task$perform,
-		$elm$core$Basics$identity,
-		$elm$core$Task$succeed(x));
-};
-var $zaboco$elm_draggable$Cmd$Extra$optionalMessage = function (msgMaybe) {
-	return A2(
-		$elm$core$Maybe$withDefault,
-		$elm$core$Platform$Cmd$none,
-		A2($elm$core$Maybe$map, $zaboco$elm_draggable$Cmd$Extra$message, msgMaybe));
-};
-var $zaboco$elm_draggable$Internal$Dragging = function (a) {
-	return {$: 'Dragging', a: a};
-};
-var $zaboco$elm_draggable$Internal$DraggingTentative = F2(
-	function (a, b) {
-		return {$: 'DraggingTentative', a: a, b: b};
-	});
-var $zaboco$elm_draggable$Internal$distanceTo = F2(
-	function (end, start) {
-		return _Utils_Tuple2(end.x - start.x, end.y - start.y);
-	});
-var $zaboco$elm_draggable$Internal$updateAndEmit = F3(
-	function (config, msg, drag) {
-		var _v0 = _Utils_Tuple2(drag, msg);
-		_v0$5:
-		while (true) {
-			switch (_v0.a.$) {
-				case 'NotDragging':
-					if (_v0.b.$ === 'StartDragging') {
-						var _v1 = _v0.a;
-						var _v2 = _v0.b;
-						var key = _v2.a;
-						var initialPosition = _v2.b;
-						return _Utils_Tuple2(
-							A2($zaboco$elm_draggable$Internal$DraggingTentative, key, initialPosition),
-							config.onMouseDown(key));
-					} else {
-						break _v0$5;
-					}
-				case 'DraggingTentative':
-					switch (_v0.b.$) {
-						case 'DragAt':
-							var _v3 = _v0.a;
-							var key = _v3.a;
-							var oldPosition = _v3.b;
-							return _Utils_Tuple2(
-								$zaboco$elm_draggable$Internal$Dragging(oldPosition),
-								config.onDragStart(key));
-						case 'StopDragging':
-							var _v4 = _v0.a;
-							var key = _v4.a;
-							var _v5 = _v0.b;
-							return _Utils_Tuple2(
-								$zaboco$elm_draggable$Internal$NotDragging,
-								config.onClick(key));
-						default:
-							break _v0$5;
-					}
-				default:
-					switch (_v0.b.$) {
-						case 'DragAt':
-							var oldPosition = _v0.a.a;
-							var newPosition = _v0.b.a;
-							return _Utils_Tuple2(
-								$zaboco$elm_draggable$Internal$Dragging(newPosition),
-								config.onDragBy(
-									A2($zaboco$elm_draggable$Internal$distanceTo, newPosition, oldPosition)));
-						case 'StopDragging':
-							var _v6 = _v0.b;
-							return _Utils_Tuple2($zaboco$elm_draggable$Internal$NotDragging, config.onDragEnd);
-						default:
-							break _v0$5;
-					}
-			}
-		}
-		return _Utils_Tuple2(drag, $elm$core$Maybe$Nothing);
-	});
-var $zaboco$elm_draggable$Draggable$updateDraggable = F3(
-	function (_v0, _v1, _v2) {
-		var config = _v0.a;
-		var msg = _v1.a;
-		var drag = _v2.a;
-		var _v3 = A3($zaboco$elm_draggable$Internal$updateAndEmit, config, msg, drag);
-		var newDrag = _v3.a;
-		var newMsgMaybe = _v3.b;
-		return _Utils_Tuple2(
-			$zaboco$elm_draggable$Draggable$State(newDrag),
-			$zaboco$elm_draggable$Cmd$Extra$optionalMessage(newMsgMaybe));
-	});
-var $zaboco$elm_draggable$Draggable$update = F3(
-	function (config, msg, model) {
-		var _v0 = A3($zaboco$elm_draggable$Draggable$updateDraggable, config, msg, model.drag);
-		var dragState = _v0.a;
-		var dragCmd = _v0.b;
-		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{drag: dragState}),
-			dragCmd);
-	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -9272,22 +8822,6 @@ var $author$project$Main$update = F2(
 								}),
 							$elm$core$Platform$Cmd$none);
 				}
-			case 'OnDragBy':
-				var _v2 = msg.a;
-				var dx = _v2.a;
-				var dy = _v2.b;
-				var _v3 = model.position;
-				var x = _v3.a;
-				var y = _v3.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							position: _Utils_Tuple2(
-								$elm$core$Basics$round(x + dx),
-								$elm$core$Basics$round(y + dy))
-						}),
-					$elm$core$Platform$Cmd$none);
 			case 'GotSpeed':
 				var result = msg.a;
 				if (result.$ === 'Ok') {
@@ -9348,7 +8882,7 @@ var $author$project$Main$update = F2(
 							{stackStatus: 'Error'}),
 						$elm$core$Platform$Cmd$none);
 				}
-			case 'GotStructure':
+			default:
 				var result = msg.a;
 				if (result.$ === 'Ok') {
 					var details = result.a;
@@ -9368,9 +8902,6 @@ var $author$project$Main$update = F2(
 							{structStatus: 'Error'}),
 						$elm$core$Platform$Cmd$none);
 				}
-			default:
-				var dragMsg = msg.a;
-				return A3($zaboco$elm_draggable$Draggable$update, $author$project$Main$dragConfig, dragMsg, model);
 		}
 	});
 var $author$project$Main$ClickCheckWebsite = {$: 'ClickCheckWebsite'};
@@ -11806,6 +11337,11 @@ var $gampleman$elm_visualization$Force$Links = F2(
 	function (a, b) {
 		return {$: 'Links', a: a, b: b};
 	});
+var $elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
 var $gampleman$elm_visualization$Force$customLinks = F2(
 	function (iters, list) {
 		var counts = A3(
@@ -12430,6 +11966,7 @@ var $avh4$elm_color$Color$rgba = F4(
 	});
 var $author$project$ForceDirectedGraph$color = A4($avh4$elm_color$Color$rgba, 0.39, 0.65, 0.86, 1);
 var $elm_community$typed_svg$TypedSvg$line = $elm_community$typed_svg$TypedSvg$Core$node('line');
+var $elm$core$Basics$round = _Basics_round;
 var $avh4$elm_color$Color$toCssString = function (_v0) {
 	var r = _v0.a;
 	var g = _v0.b;

@@ -6,7 +6,6 @@ import Array exposing (append)
 import Browser
 import Browser.Events as Events exposing (Visibility(..))
 import Dict exposing (Dict)
-import Draggable
 import ForceDirectedGraph as FDG
 import Graph exposing (Edge, Graph, Node, NodeId)
 import Html exposing (Html, a, b, br, button, div, h1, h2, hr, i, img, input, label, li, option, p, select, small, span, text, ul)
@@ -28,7 +27,6 @@ type alias Model =
     { input : String
     , websiteUrl : Maybe Url
     , position : ( Int, Int )
-    , drag : Draggable.State String
     , speedDetails : SpeedDetails
     , domainOwnershipDetails : DomainOwnershipDetails
     , stackDetails : StackDetails
@@ -51,7 +49,6 @@ initialModel =
     { input = ""
     , websiteUrl = Nothing
     , position = ( 0, 0 )
-    , drag = Draggable.init
     , speedDetails = SpeedDetails 0 0 0
     , domainOwnershipDetails = DomainOwnershipDetails "" "" ""
     , stackDetails = StackDetails []
@@ -80,8 +77,6 @@ init _ =
 
 type Msg
     = ClickCheckWebsite
-    | OnDragBy Draggable.Delta
-    | DragMsg (Draggable.Msg String)
     | GotSpeed (Result Http.Error SpeedDetails)
     | GotDomain (Result Http.Error DomainOwnershipDetails)
     | GotStack (Result Http.Error StackDetails)
@@ -129,13 +124,6 @@ update msg model =
                 TargetStruct ->
                     ( { model | apiSelection = toggleStructSelected model.apiSelection }, Cmd.none )
 
-        OnDragBy ( dx, dy ) ->
-            let
-                ( x, y ) =
-                    model.position
-            in
-            ( { model | position = ( round (toFloat x + dx), round (toFloat y + dy) ) }, Cmd.none )
-
         GotSpeed result ->
             case result of
                 Ok details ->
@@ -167,9 +155,6 @@ update msg model =
 
                 Err err ->
                     ( { model | structStatus = "Error" }, Cmd.none )
-
-        DragMsg dragMsg ->
-            Draggable.update dragConfig dragMsg model
 
 
 
@@ -253,16 +238,11 @@ toggleStructSelected selection =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Draggable.subscriptions DragMsg model.drag
+    Sub.none
 
 
 
 ---- Functions ----
-
-
-dragConfig : Draggable.Config String Msg
-dragConfig =
-    Draggable.basicConfig OnDragBy
 
 
 renderSpeedDetails : SpeedDetails -> Html Msg
@@ -555,7 +535,6 @@ extractMaybebVal list =
 
 
 
----- Constants ----
 ---- VIEW ----
 
 
