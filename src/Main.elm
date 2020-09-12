@@ -4,17 +4,19 @@ module Main exposing (main)
 
 import Array exposing (append)
 import Browser
+import Debug as T
 import Dict exposing (Dict)
 import ForceDirectedGraph as FDG
 import Graph exposing (Graph)
-import Html exposing (Html, a, b, button, div, h1, h2, img, input, label, p, span, text)
+import Html exposing (Html, a, b, button, div, h1, h2, img, input, label, p, progress, span, text)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onCheck, onClick, onInput)
-import Http exposing (Header)
+import Http exposing (Header, Progress(..), track)
 import Http.Xml
 import Json.Decode as D
 import ListHelper exposing (..)
 import Round as R
+import TypedSvg.Attributes exposing (visibility)
 import Url as U exposing (Url)
 import Xml.Decode as X
 
@@ -36,10 +38,11 @@ type alias Model =
     , showStackDetails : Bool
     , showStructDetails : Bool
     , apiSelection : ApiSelection
-    , domainStatus : String
-    , speedStatus : String
-    , stackStatus : String
-    , structStatus : String
+    , speedProgress : ( Int, Maybe Int )
+    , domainProgress : ( Int, Maybe Int )
+    , stackProgress : ( Int, Maybe Int )
+    , structProgress : ( Int, Maybe Int )
+    , domainError : String
     }
 
 
@@ -57,10 +60,11 @@ initialModel =
     , showStackDetails = False
     , showStructDetails = False
     , apiSelection = ApiSelection False False False False
-    , domainStatus = "Not Started"
-    , speedStatus = "Not Started"
-    , stackStatus = "Not Started"
-    , structStatus = "Not Started"
+    , speedProgress = ( 0, Just 0 )
+    , domainProgress = ( 0, Just 0 )
+    , stackProgress = ( 0, Just 0 )
+    , structProgress = ( 0, Just 0 )
+    , domainError = ""
     }
 
 
@@ -86,6 +90,10 @@ type Msg
     | ExpandStackContent
     | ExpandStructContent
     | ApiSelectionChange Target Bool
+    | GotSpeedProgress Progress
+    | GotDomainProgress Progress
+    | GotStackProgress Progress
+    | GotStructProgress Progress
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -129,34 +137,66 @@ update msg model =
         GotSpeed result ->
             case result of
                 Ok details ->
-                    ( { model | speedStatus = "Sucess", speedDetails = SpeedDetails details.timeToInteractive details.firstContentfulPaint details.serverResponseTime }, Cmd.none )
+                    ( { model | speedDetails = SpeedDetails details.timeToInteractive details.firstContentfulPaint details.serverResponseTime }, Cmd.none )
 
                 Err err ->
-                    ( { model | speedStatus = "Error" }, Cmd.none )
+                    ( model, Cmd.none )
+
+        GotSpeedProgress progress ->
+            case progress of
+                Receiving status ->
+                    ( { model | speedProgress = ( status.received, status.size ) }, Cmd.none )
+
+                Sending _ ->
+                    ( model, Cmd.none )
 
         GotDomain result ->
             case result of
                 Ok details ->
-                    ( { model | domainStatus = "Sucess", domainOwnershipDetails = DomainOwnershipDetails details.organization details.state details.country }, Cmd.none )
+                    ( { model | domainOwnershipDetails = DomainOwnershipDetails details.organization details.state details.country }, Cmd.none )
 
                 Err err ->
-                    ( { model | domainStatus = "Error" }, Cmd.none )
+                    ( { model | domainError = errorToString err }, Cmd.none )
+
+        GotDomainProgress progress ->
+            case progress of
+                Receiving status ->
+                    ( { model | speedProgress = ( status.received, status.size ) }, Cmd.none )
+
+                Sending _ ->
+                    ( model, Cmd.none )
 
         GotStack result ->
             case result of
                 Ok details ->
-                    ( { model | stackStatus = "Sucess", stackDetails = StackDetails details.technologies }, Cmd.none )
+                    ( { model | stackDetails = StackDetails details.technologies }, Cmd.none )
 
                 Err err ->
-                    ( { model | stackStatus = "Error" }, Cmd.none )
+                    ( model, Cmd.none )
+
+        GotStackProgress progress ->
+            case progress of
+                Receiving status ->
+                    ( { model | speedProgress = ( status.received, status.size ) }, Cmd.none )
+
+                Sending _ ->
+                    ( model, Cmd.none )
 
         GotStructure result ->
             case result of
                 Ok details ->
-                    ( { model | structStatus = "Sucess", structDetails = StructureDetails details.items }, Cmd.none )
+                    ( { model | structDetails = StructureDetails details.items }, Cmd.none )
 
                 Err err ->
-                    ( { model | structStatus = "Error" }, Cmd.none )
+                    ( model, Cmd.none )
+
+        GotStructProgress progress ->
+            case progress of
+                Receiving status ->
+                    ( { model | speedProgress = ( status.received, status.size ) }, Cmd.none )
+
+                Sending _ ->
+                    ( model, Cmd.none )
 
 
 
@@ -240,7 +280,12 @@ toggleStructSelected selection =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Sub.batch
+        [ track "speedTracker" GotSpeedProgress
+        , track "domainTracker" GotDomainProgress
+        , track "stackTracker" GotStackProgress
+        , track "structTracker" GotStructProgress
+        ]
 
 
 
@@ -331,14 +376,24 @@ renderIf shouldRender elem =
         empty
 
 
+getLoadingPercentage : Int -> Int -> Int
+getLoadingPercentage value size =
+    truncate ((toFloat value * 100.0) / toFloat size)
+
+
 fetchFromGooglePageSpeedTest : Model -> Maybe Url -> Cmd Msg
 fetchFromGooglePageSpeedTest model websiteUrl =
     case websiteUrl of
         Just url ->
             if model.apiSelection.speedSelected then
-                Http.get
-                    { url = String.concat [ "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=", U.toString url, "&key=AIzaSyBfcmkhsGWVmLlVYn0YkTk6dDZFrcbbXV4&category=PERFORMANCE&strategy=DESKTOP" ]
+                Http.request
+                    { body = Http.emptyBody
                     , expect = Http.expectJson GotSpeed gpstDecoder
+                    , headers = []
+                    , method = "GET"
+                    , timeout = Nothing
+                    , tracker = Just "speedTracker"
+                    , url = String.concat [ "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=", U.toString url, "&key=AIzaSyBfcmkhsGWVmLlVYn0YkTk6dDZFrcbbXV4&category=PERFORMANCE&strategy=DESKTOP" ]
                     }
 
             else
@@ -353,9 +408,14 @@ fetchFromWhoIsXML model websiteUrl =
     case websiteUrl of
         Just url ->
             if model.apiSelection.domainSelected then
-                Http.get
-                    { url = String.concat [ "https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_XRwFO1KDNvYMqdy0QfkAGpMhB7i58&domainName=", U.toString url ]
+                Http.riskyRequest
+                    { body = Http.emptyBody
                     , expect = Http.Xml.expectXml GotDomain wixDecoder
+                    , headers = []
+                    , method = "GET"
+                    , timeout = Nothing
+                    , tracker = Just "domainTracker"
+                    , url = String.concat [ "https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_XRwFO1KDNvYMqdy0QfkAGpMhB7i58&domainName=", U.toString url ]
                     }
 
             else
@@ -370,9 +430,14 @@ fetchFromBuiltwith model websiteUrl =
     case websiteUrl of
         Just url ->
             if model.apiSelection.stackSelected then
-                Http.get
-                    { url = String.concat [ "https://api.builtwith.com/v17/api.json?KEY=8e1d176e-26be-4379-8f60-79d46a255c0d&LOOKUP=", U.toString url, "&HIDEDL=no" ]
+                Http.request
+                    { body = Http.emptyBody
                     , expect = Http.expectJson GotStack extractWapDecoder
+                    , headers = []
+                    , method = "GET"
+                    , timeout = Nothing
+                    , tracker = Just "stackTracker"
+                    , url = String.concat [ "https://api.builtwith.com/v17/api.json?KEY=8e1d176e-26be-4379-8f60-79d46a255c0d&LOOKUP=", U.toString url, "&HIDEDL=no" ]
                     }
 
             else
@@ -387,9 +452,14 @@ fetchFromCrawler model websiteUrl =
     case websiteUrl of
         Just url ->
             if model.apiSelection.structureSelected then
-                Http.get
-                    { url = String.concat [ "http://arne-baumann.de:9080/crawl.json?spider_name=linkspider&start_requests=true&domain=", url.host, "&starturl=", U.toString url ]
+                Http.request
+                    { body = Http.emptyBody
                     , expect = Http.expectJson GotStructure crawlDecoder
+                    , headers = []
+                    , method = "GET"
+                    , timeout = Nothing
+                    , tracker = Just "structTracker"
+                    , url = String.concat [ "http://arne-baumann.de:9080/crawl.json?spider_name=linkspider&start_requests=true&domain=", url.host, "&starturl=", U.toString url ]
                     }
 
             else
@@ -481,9 +551,9 @@ viewDomain model =
                 ]
             , div [ class "status-info" ]
                 [ h1 []
-                    [ text model.domainStatus ]
+                    [ text (String.concat [ String.fromInt (getLoadingPercentage (Tuple.first model.domainProgress) (Maybe.withDefault 100 (Tuple.second model.domainProgress))), " %" ]) ]
                 ]
-            , div [ class "expand-item" ]
+            , div [ class "expand-item", visibility "hidden" ]
                 [ a [ class "arrowButton", onClick ExpandDomainContent ]
                     [ span [ class "leftSide" ]
                         []
@@ -550,7 +620,7 @@ viewSpeed model =
                 ]
             , div [ class "status-info" ]
                 [ h1 []
-                    [ text model.speedStatus ]
+                    [ text (String.concat [ String.fromInt (getLoadingPercentage (Tuple.first model.speedProgress) (Maybe.withDefault 100 (Tuple.second model.speedProgress))), " %" ]) ]
                 ]
             , div [ class "expand-item" ]
                 [ a [ class "arrowButton", onClick ExpandSpeedContent ]
@@ -619,7 +689,7 @@ viewStack model =
                 ]
             , div [ class "status-info" ]
                 [ h1 []
-                    [ text model.stackStatus ]
+                    [ text (String.concat [ String.fromInt (getLoadingPercentage (Tuple.first model.stackProgress) (Maybe.withDefault 100 (Tuple.second model.stackProgress))), " %" ]) ]
                 ]
             , div [ class "expand-item" ]
                 [ a [ class "arrowButton", onClick ExpandStackContent ]
@@ -659,7 +729,7 @@ viewInfo =
                 ]
             , div [ class "head-status-info" ]
                 [ h1 []
-                    [ text "Status" ]
+                    [ text "Received" ]
                 ]
             , div [ class "head-expand-item" ]
                 [ h1 []
@@ -675,7 +745,7 @@ viewStructure model =
         [ div [ class "detail-section" ]
             [ div [ class "general-info" ]
                 [ h1 []
-                    [ text "Structure" ]
+                    [ text model.domainError ]
                 ]
             , div [ class "activate" ]
                 [ label [ class "switch" ]
@@ -687,7 +757,7 @@ viewStructure model =
                 ]
             , div [ class "status-info" ]
                 [ h1 []
-                    [ text model.structStatus ]
+                    [ text (String.concat [ String.fromInt (getLoadingPercentage (Tuple.first model.structProgress) (Maybe.withDefault 100 (Tuple.second model.structProgress))), " %" ]) ]
                 ]
             , div [ class "expand-item" ]
                 [ a [ class "arrowButton", onClick ExpandStructContent ]

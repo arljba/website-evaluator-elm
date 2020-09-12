@@ -5506,8 +5506,11 @@ var $author$project$Main$StructureDetails = function (items) {
 };
 var $author$project$Main$initialModel = {
 	apiSelection: A4($author$project$Main$ApiSelection, false, false, false, false),
+	domainError: '',
 	domainOwnershipDetails: A3($author$project$Main$DomainOwnershipDetails, '', '', ''),
-	domainStatus: 'Not Started',
+	domainProgress: _Utils_Tuple2(
+		0,
+		$elm$core$Maybe$Just(0)),
 	input: '',
 	isValid: false,
 	showDomainDetails: false,
@@ -5515,11 +5518,17 @@ var $author$project$Main$initialModel = {
 	showStackDetails: false,
 	showStructDetails: false,
 	speedDetails: A3($author$project$Main$SpeedDetails, 0, 0, 0),
-	speedStatus: 'Not Started',
+	speedProgress: _Utils_Tuple2(
+		0,
+		$elm$core$Maybe$Just(0)),
 	stackDetails: $author$project$Main$StackDetails(_List_Nil),
-	stackStatus: 'Not Started',
+	stackProgress: _Utils_Tuple2(
+		0,
+		$elm$core$Maybe$Just(0)),
 	structDetails: $author$project$Main$StructureDetails(_List_Nil),
-	structStatus: 'Not Started',
+	structProgress: _Utils_Tuple2(
+		0,
+		$elm$core$Maybe$Just(0)),
 	websiteUrl: $elm$core$Maybe$Nothing
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
@@ -5527,18 +5536,31 @@ var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2($author$project$Main$initialModel, $elm$core$Platform$Cmd$none);
 };
+var $author$project$Main$GotDomainProgress = function (a) {
+	return {$: 'GotDomainProgress', a: a};
+};
+var $author$project$Main$GotSpeedProgress = function (a) {
+	return {$: 'GotSpeedProgress', a: a};
+};
+var $author$project$Main$GotStackProgress = function (a) {
+	return {$: 'GotStackProgress', a: a};
+};
+var $author$project$Main$GotStructProgress = function (a) {
+	return {$: 'GotStructProgress', a: a};
+};
 var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $author$project$Main$subscriptions = function (model) {
-	return $elm$core$Platform$Sub$none;
-};
-var $author$project$Main$GotStack = function (a) {
-	return {$: 'GotStack', a: a};
-};
-var $elm$core$String$concat = function (strings) {
-	return A2($elm$core$String$join, '', strings);
-};
-var $elm$json$Json$Decode$decodeString = _Json_runOnString;
+var $elm$http$Http$MySub = F2(
+	function (a, b) {
+		return {$: 'MySub', a: a, b: b};
+	});
+var $elm$http$Http$State = F2(
+	function (reqs, subs) {
+		return {reqs: reqs, subs: subs};
+	});
+var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
+var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
+var $elm$http$Http$init = $elm$core$Task$succeed(
+	A2($elm$http$Http$State, $elm$core$Dict$empty, _List_Nil));
 var $elm$http$Http$BadStatus_ = F2(
 	function (a, b) {
 		return {$: 'BadStatus_', a: a, b: b};
@@ -5558,8 +5580,6 @@ var $elm$http$Http$Sending = function (a) {
 	return {$: 'Sending', a: a};
 };
 var $elm$http$Http$Timeout_ = {$: 'Timeout_'};
-var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
-var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
 var $elm$core$Maybe$isJust = function (maybe) {
 	if (maybe.$ === 'Just') {
 		return true;
@@ -6081,122 +6101,6 @@ var $elm$core$Dict$update = F3(
 			return A2($elm$core$Dict$remove, targetKey, dictionary);
 		}
 	});
-var $elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
-	});
-var $elm$http$Http$expectStringResponse = F2(
-	function (toMsg, toResult) {
-		return A3(
-			_Http_expect,
-			'',
-			$elm$core$Basics$identity,
-			A2($elm$core$Basics$composeR, toResult, toMsg));
-	});
-var $elm$core$Result$mapError = F2(
-	function (f, result) {
-		if (result.$ === 'Ok') {
-			var v = result.a;
-			return $elm$core$Result$Ok(v);
-		} else {
-			var e = result.a;
-			return $elm$core$Result$Err(
-				f(e));
-		}
-	});
-var $elm$http$Http$BadBody = function (a) {
-	return {$: 'BadBody', a: a};
-};
-var $elm$http$Http$BadStatus = function (a) {
-	return {$: 'BadStatus', a: a};
-};
-var $elm$http$Http$BadUrl = function (a) {
-	return {$: 'BadUrl', a: a};
-};
-var $elm$http$Http$NetworkError = {$: 'NetworkError'};
-var $elm$http$Http$Timeout = {$: 'Timeout'};
-var $elm$http$Http$resolve = F2(
-	function (toResult, response) {
-		switch (response.$) {
-			case 'BadUrl_':
-				var url = response.a;
-				return $elm$core$Result$Err(
-					$elm$http$Http$BadUrl(url));
-			case 'Timeout_':
-				return $elm$core$Result$Err($elm$http$Http$Timeout);
-			case 'NetworkError_':
-				return $elm$core$Result$Err($elm$http$Http$NetworkError);
-			case 'BadStatus_':
-				var metadata = response.a;
-				return $elm$core$Result$Err(
-					$elm$http$Http$BadStatus(metadata.statusCode));
-			default:
-				var body = response.b;
-				return A2(
-					$elm$core$Result$mapError,
-					$elm$http$Http$BadBody,
-					toResult(body));
-		}
-	});
-var $elm$http$Http$expectJson = F2(
-	function (toMsg, decoder) {
-		return A2(
-			$elm$http$Http$expectStringResponse,
-			toMsg,
-			$elm$http$Http$resolve(
-				function (string) {
-					return A2(
-						$elm$core$Result$mapError,
-						$elm$json$Json$Decode$errorToString,
-						A2($elm$json$Json$Decode$decodeString, decoder, string));
-				}));
-	});
-var $elm$json$Json$Decode$field = _Json_decodeField;
-var $elm$json$Json$Decode$at = F2(
-	function (fields, decoder) {
-		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
-	});
-var $elm$json$Json$Decode$index = _Json_decodeIndex;
-var $elm$json$Json$Decode$list = _Json_decodeList;
-var $author$project$Main$Technologie = F2(
-	function (name, categories) {
-		return {categories: categories, name: name};
-	});
-var $elm$json$Json$Decode$string = _Json_decodeString;
-var $author$project$Main$techDecoder = A3(
-	$elm$json$Json$Decode$map2,
-	$author$project$Main$Technologie,
-	A2($elm$json$Json$Decode$field, 'Name', $elm$json$Json$Decode$string),
-	A2($elm$json$Json$Decode$field, 'Tag', $elm$json$Json$Decode$string));
-var $author$project$Main$wapDecoder = A2(
-	$elm$json$Json$Decode$map,
-	$author$project$Main$StackDetails,
-	A2(
-		$elm$json$Json$Decode$field,
-		'Technologies',
-		$elm$json$Json$Decode$list($author$project$Main$techDecoder)));
-var $author$project$Main$extractWapDecoder = A2(
-	$elm$json$Json$Decode$field,
-	'Results',
-	A2(
-		$elm$json$Json$Decode$index,
-		0,
-		A2(
-			$elm$json$Json$Decode$at,
-			_List_fromArray(
-				['Result', 'Paths']),
-			A2($elm$json$Json$Decode$index, 0, $author$project$Main$wapDecoder))));
-var $elm$http$Http$emptyBody = _Http_emptyBody;
-var $elm$http$Http$Request = function (a) {
-	return {$: 'Request', a: a};
-};
-var $elm$http$Http$State = F2(
-	function (reqs, subs) {
-		return {reqs: reqs, subs: subs};
-	});
-var $elm$http$Http$init = $elm$core$Task$succeed(
-	A2($elm$http$Http$State, $elm$core$Dict$empty, _List_Nil));
 var $elm$core$Process$kill = _Scheduler_kill;
 var $elm$core$Process$spawn = _Scheduler_spawn;
 var $elm$http$Http$updateReqs = F3(
@@ -6315,6 +6219,9 @@ var $elm$http$Http$onSelfMsg = F3(
 var $elm$http$Http$Cancel = function (a) {
 	return {$: 'Cancel', a: a};
 };
+var $elm$http$Http$Request = function (a) {
+	return {$: 'Request', a: a};
+};
 var $elm$http$Http$cmdMap = F2(
 	function (func, cmd) {
 		if (cmd.$ === 'Cancel') {
@@ -6335,9 +6242,10 @@ var $elm$http$Http$cmdMap = F2(
 				});
 		}
 	});
-var $elm$http$Http$MySub = F2(
-	function (a, b) {
-		return {$: 'MySub', a: a, b: b};
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
 	});
 var $elm$http$Http$subMap = F2(
 	function (func, _v0) {
@@ -6351,14 +6259,156 @@ var $elm$http$Http$subMap = F2(
 _Platform_effectManagers['Http'] = _Platform_createManager($elm$http$Http$init, $elm$http$Http$onEffects, $elm$http$Http$onSelfMsg, $elm$http$Http$cmdMap, $elm$http$Http$subMap);
 var $elm$http$Http$command = _Platform_leaf('Http');
 var $elm$http$Http$subscription = _Platform_leaf('Http');
+var $elm$http$Http$track = F2(
+	function (tracker, toMsg) {
+		return $elm$http$Http$subscription(
+			A2($elm$http$Http$MySub, tracker, toMsg));
+	});
+var $author$project$Main$subscriptions = function (model) {
+	return $elm$core$Platform$Sub$batch(
+		_List_fromArray(
+			[
+				A2($elm$http$Http$track, 'speedTracker', $author$project$Main$GotSpeedProgress),
+				A2($elm$http$Http$track, 'domainTracker', $author$project$Main$GotDomainProgress),
+				A2($elm$http$Http$track, 'stackTracker', $author$project$Main$GotStackProgress),
+				A2($elm$http$Http$track, 'structTracker', $author$project$Main$GotStructProgress)
+			]));
+};
+var $author$project$Main$errorToString = function (error) {
+	switch (error.$) {
+		case 'BadUrl':
+			var url = error.a;
+			return 'The URL ' + (url + ' was invalid');
+		case 'Timeout':
+			return 'Unable to reach the server, try again';
+		case 'NetworkError':
+			return 'Unable to reach the server, check your network connection';
+		case 'BadStatus':
+			switch (error.a) {
+				case 500:
+					return 'The server had a problem, try again later';
+				case 400:
+					return 'Verify your information and try again';
+				default:
+					return 'Unknown error';
+			}
+		default:
+			return 'Cant parse body';
+	}
+};
+var $author$project$Main$GotStack = function (a) {
+	return {$: 'GotStack', a: a};
+};
+var $elm$core$String$concat = function (strings) {
+	return A2($elm$core$String$join, '', strings);
+};
+var $elm$http$Http$emptyBody = _Http_emptyBody;
+var $elm$json$Json$Decode$decodeString = _Json_runOnString;
+var $elm$http$Http$expectStringResponse = F2(
+	function (toMsg, toResult) {
+		return A3(
+			_Http_expect,
+			'',
+			$elm$core$Basics$identity,
+			A2($elm$core$Basics$composeR, toResult, toMsg));
+	});
+var $elm$core$Result$mapError = F2(
+	function (f, result) {
+		if (result.$ === 'Ok') {
+			var v = result.a;
+			return $elm$core$Result$Ok(v);
+		} else {
+			var e = result.a;
+			return $elm$core$Result$Err(
+				f(e));
+		}
+	});
+var $elm$http$Http$BadBody = function (a) {
+	return {$: 'BadBody', a: a};
+};
+var $elm$http$Http$BadStatus = function (a) {
+	return {$: 'BadStatus', a: a};
+};
+var $elm$http$Http$BadUrl = function (a) {
+	return {$: 'BadUrl', a: a};
+};
+var $elm$http$Http$NetworkError = {$: 'NetworkError'};
+var $elm$http$Http$Timeout = {$: 'Timeout'};
+var $elm$http$Http$resolve = F2(
+	function (toResult, response) {
+		switch (response.$) {
+			case 'BadUrl_':
+				var url = response.a;
+				return $elm$core$Result$Err(
+					$elm$http$Http$BadUrl(url));
+			case 'Timeout_':
+				return $elm$core$Result$Err($elm$http$Http$Timeout);
+			case 'NetworkError_':
+				return $elm$core$Result$Err($elm$http$Http$NetworkError);
+			case 'BadStatus_':
+				var metadata = response.a;
+				return $elm$core$Result$Err(
+					$elm$http$Http$BadStatus(metadata.statusCode));
+			default:
+				var body = response.b;
+				return A2(
+					$elm$core$Result$mapError,
+					$elm$http$Http$BadBody,
+					toResult(body));
+		}
+	});
+var $elm$http$Http$expectJson = F2(
+	function (toMsg, decoder) {
+		return A2(
+			$elm$http$Http$expectStringResponse,
+			toMsg,
+			$elm$http$Http$resolve(
+				function (string) {
+					return A2(
+						$elm$core$Result$mapError,
+						$elm$json$Json$Decode$errorToString,
+						A2($elm$json$Json$Decode$decodeString, decoder, string));
+				}));
+	});
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$json$Json$Decode$index = _Json_decodeIndex;
+var $elm$json$Json$Decode$list = _Json_decodeList;
+var $author$project$Main$Technologie = F2(
+	function (name, categories) {
+		return {categories: categories, name: name};
+	});
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $author$project$Main$techDecoder = A3(
+	$elm$json$Json$Decode$map2,
+	$author$project$Main$Technologie,
+	A2($elm$json$Json$Decode$field, 'Name', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'Tag', $elm$json$Json$Decode$string));
+var $author$project$Main$wapDecoder = A2(
+	$elm$json$Json$Decode$map,
+	$author$project$Main$StackDetails,
+	A2(
+		$elm$json$Json$Decode$field,
+		'Technologies',
+		$elm$json$Json$Decode$list($author$project$Main$techDecoder)));
+var $author$project$Main$extractWapDecoder = A2(
+	$elm$json$Json$Decode$field,
+	'Results',
+	A2(
+		$elm$json$Json$Decode$index,
+		0,
+		A2(
+			$elm$json$Json$Decode$at,
+			_List_fromArray(
+				['Result', 'Paths']),
+			A2($elm$json$Json$Decode$index, 0, $author$project$Main$wapDecoder))));
 var $elm$http$Http$request = function (r) {
 	return $elm$http$Http$command(
 		$elm$http$Http$Request(
 			{allowCookiesFromOtherDomains: false, body: r.body, expect: r.expect, headers: r.headers, method: r.method, timeout: r.timeout, tracker: r.tracker, url: r.url}));
-};
-var $elm$http$Http$get = function (r) {
-	return $elm$http$Http$request(
-		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
 var $elm$url$Url$addPort = F2(
 	function (maybePort, starter) {
@@ -6408,9 +6458,14 @@ var $author$project$Main$fetchFromBuiltwith = F2(
 	function (model, websiteUrl) {
 		if (websiteUrl.$ === 'Just') {
 			var url = websiteUrl.a;
-			return model.apiSelection.stackSelected ? $elm$http$Http$get(
+			return model.apiSelection.stackSelected ? $elm$http$Http$request(
 				{
+					body: $elm$http$Http$emptyBody,
 					expect: A2($elm$http$Http$expectJson, $author$project$Main$GotStack, $author$project$Main$extractWapDecoder),
+					headers: _List_Nil,
+					method: 'GET',
+					timeout: $elm$core$Maybe$Nothing,
+					tracker: $elm$core$Maybe$Just('stackTracker'),
 					url: $elm$core$String$concat(
 						_List_fromArray(
 							[
@@ -6449,9 +6504,14 @@ var $author$project$Main$fetchFromCrawler = F2(
 	function (model, websiteUrl) {
 		if (websiteUrl.$ === 'Just') {
 			var url = websiteUrl.a;
-			return model.apiSelection.structureSelected ? $elm$http$Http$get(
+			return model.apiSelection.structureSelected ? $elm$http$Http$request(
 				{
+					body: $elm$http$Http$emptyBody,
 					expect: A2($elm$http$Http$expectJson, $author$project$Main$GotStructure, $author$project$Main$crawlDecoder),
+					headers: _List_Nil,
+					method: 'GET',
+					timeout: $elm$core$Maybe$Nothing,
+					tracker: $elm$core$Maybe$Just('structTracker'),
 					url: $elm$core$String$concat(
 						_List_fromArray(
 							[
@@ -6506,9 +6566,14 @@ var $author$project$Main$fetchFromGooglePageSpeedTest = F2(
 	function (model, websiteUrl) {
 		if (websiteUrl.$ === 'Just') {
 			var url = websiteUrl.a;
-			return model.apiSelection.speedSelected ? $elm$http$Http$get(
+			return model.apiSelection.speedSelected ? $elm$http$Http$request(
 				{
+					body: $elm$http$Http$emptyBody,
 					expect: A2($elm$http$Http$expectJson, $author$project$Main$GotSpeed, $author$project$Main$gpstDecoder),
+					headers: _List_Nil,
+					method: 'GET',
+					timeout: $elm$core$Maybe$Nothing,
+					tracker: $elm$core$Maybe$Just('speedTracker'),
 					url: $elm$core$String$concat(
 						_List_fromArray(
 							[
@@ -8458,6 +8523,11 @@ var $ymtszw$elm_http_xml$Http$Xml$expectXml = F2(
 				}
 			});
 	});
+var $elm$http$Http$riskyRequest = function (r) {
+	return $elm$http$Http$command(
+		$elm$http$Http$Request(
+			{allowCookiesFromOtherDomains: true, body: r.body, expect: r.expect, headers: r.headers, method: r.method, timeout: r.timeout, tracker: r.tracker, url: r.url}));
+};
 var $ymtszw$elm_xml_decode$Xml$Decode$Decoder = function (a) {
 	return {$: 'Decoder', a: a};
 };
@@ -8702,9 +8772,14 @@ var $author$project$Main$fetchFromWhoIsXML = F2(
 	function (model, websiteUrl) {
 		if (websiteUrl.$ === 'Just') {
 			var url = websiteUrl.a;
-			return model.apiSelection.domainSelected ? $elm$http$Http$get(
+			return model.apiSelection.domainSelected ? $elm$http$Http$riskyRequest(
 				{
+					body: $elm$http$Http$emptyBody,
 					expect: A2($ymtszw$elm_http_xml$Http$Xml$expectXml, $author$project$Main$GotDomain, $author$project$Main$wixDecoder),
+					headers: _List_Nil,
+					method: 'GET',
+					timeout: $elm$core$Maybe$Nothing,
+					tracker: $elm$core$Maybe$Just('domainTracker'),
 					url: $elm$core$String$concat(
 						_List_fromArray(
 							[
@@ -8831,17 +8906,26 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								speedDetails: A3($author$project$Main$SpeedDetails, details.timeToInteractive, details.firstContentfulPaint, details.serverResponseTime),
-								speedStatus: 'Sucess'
+								speedDetails: A3($author$project$Main$SpeedDetails, details.timeToInteractive, details.firstContentfulPaint, details.serverResponseTime)
 							}),
 						$elm$core$Platform$Cmd$none);
 				} else {
 					var err = result.a;
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'GotSpeedProgress':
+				var progress = msg.a;
+				if (progress.$ === 'Receiving') {
+					var status = progress.a;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{speedStatus: 'Error'}),
+							{
+								speedProgress: _Utils_Tuple2(status.received, status.size)
+							}),
 						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
 			case 'GotDomain':
 				var result = msg.a;
@@ -8851,8 +8935,7 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								domainOwnershipDetails: A3($author$project$Main$DomainOwnershipDetails, details.organization, details.state, details.country),
-								domainStatus: 'Sucess'
+								domainOwnershipDetails: A3($author$project$Main$DomainOwnershipDetails, details.organization, details.state, details.country)
 							}),
 						$elm$core$Platform$Cmd$none);
 				} else {
@@ -8860,8 +8943,24 @@ var $author$project$Main$update = F2(
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{domainStatus: 'Error'}),
+							{
+								domainError: $author$project$Main$errorToString(err)
+							}),
 						$elm$core$Platform$Cmd$none);
+				}
+			case 'GotDomainProgress':
+				var progress = msg.a;
+				if (progress.$ === 'Receiving') {
+					var status = progress.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								speedProgress: _Utils_Tuple2(status.received, status.size)
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
 			case 'GotStack':
 				var result = msg.a;
@@ -8871,19 +8970,28 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								stackDetails: $author$project$Main$StackDetails(details.technologies),
-								stackStatus: 'Sucess'
+								stackDetails: $author$project$Main$StackDetails(details.technologies)
 							}),
 						$elm$core$Platform$Cmd$none);
 				} else {
 					var err = result.a;
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'GotStackProgress':
+				var progress = msg.a;
+				if (progress.$ === 'Receiving') {
+					var status = progress.a;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{stackStatus: 'Error'}),
+							{
+								speedProgress: _Utils_Tuple2(status.received, status.size)
+							}),
 						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
-			default:
+			case 'GotStructure':
 				var result = msg.a;
 				if (result.$ === 'Ok') {
 					var details = result.a;
@@ -8891,17 +8999,26 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								structDetails: $author$project$Main$StructureDetails(details.items),
-								structStatus: 'Sucess'
+								structDetails: $author$project$Main$StructureDetails(details.items)
 							}),
 						$elm$core$Platform$Cmd$none);
 				} else {
 					var err = result.a;
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			default:
+				var progress = msg.a;
+				if (progress.$ === 'Receiving') {
+					var status = progress.a;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{structStatus: 'Error'}),
+							{
+								speedProgress: _Utils_Tuple2(status.received, status.size)
+							}),
 						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
 		}
 	});
@@ -8996,6 +9113,11 @@ var $elm$html$Html$Attributes$boolProperty = F2(
 			$elm$json$Json$Encode$bool(bool));
 	});
 var $elm$html$Html$Attributes$checked = $elm$html$Html$Attributes$boolProperty('checked');
+var $elm$core$Basics$truncate = _Basics_truncate;
+var $author$project$Main$getLoadingPercentage = F2(
+	function (value, size) {
+		return ((value * 100.0) / size) | 0;
+	});
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$html$Html$label = _VirtualDom_node('label');
 var $elm$json$Json$Decode$bool = _Json_decodeBool;
@@ -9015,6 +9137,10 @@ var $author$project$Main$renderIf = F2(
 	function (shouldRender, elem) {
 		return shouldRender ? elem : $author$project$Main$empty;
 	});
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
 var $elm$html$Html$p = _VirtualDom_node('p');
 var $author$project$Main$viewExpandDomain = function (model) {
 	return A2(
@@ -9147,6 +9273,15 @@ var $author$project$Main$viewExpandDomain = function (model) {
 					]))
 			]));
 };
+var $elm$virtual_dom$VirtualDom$attribute = F2(
+	function (key, value) {
+		return A2(
+			_VirtualDom_attribute,
+			_VirtualDom_noOnOrFormAction(key),
+			_VirtualDom_noJavaScriptOrHtmlUri(value));
+	});
+var $elm_community$typed_svg$TypedSvg$Core$attribute = $elm$virtual_dom$VirtualDom$attribute;
+var $elm_community$typed_svg$TypedSvg$Attributes$visibility = $elm_community$typed_svg$TypedSvg$Core$attribute('visibility');
 var $author$project$Main$viewDomain = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -9228,14 +9363,25 @@ var $author$project$Main$viewDomain = function (model) {
 								_List_Nil,
 								_List_fromArray(
 									[
-										$elm$html$Html$text(model.domainStatus)
+										$elm$html$Html$text(
+										$elm$core$String$concat(
+											_List_fromArray(
+												[
+													$elm$core$String$fromInt(
+													A2(
+														$author$project$Main$getLoadingPercentage,
+														model.domainProgress.a,
+														A2($elm$core$Maybe$withDefault, 100, model.domainProgress.b))),
+													' %'
+												])))
 									]))
 							])),
 						A2(
 						$elm$html$Html$div,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('expand-item')
+								$elm$html$Html$Attributes$class('expand-item'),
+								$elm_community$typed_svg$TypedSvg$Attributes$visibility('hidden')
 							]),
 						_List_fromArray(
 							[
@@ -9332,7 +9478,7 @@ var $author$project$Main$viewInfo = A2(
 							_List_Nil,
 							_List_fromArray(
 								[
-									$elm$html$Html$text('Status')
+									$elm$html$Html$text('Received')
 								]))
 						])),
 					A2(
@@ -9822,7 +9968,17 @@ var $author$project$Main$viewSpeed = function (model) {
 								_List_Nil,
 								_List_fromArray(
 									[
-										$elm$html$Html$text(model.speedStatus)
+										$elm$html$Html$text(
+										$elm$core$String$concat(
+											_List_fromArray(
+												[
+													$elm$core$String$fromInt(
+													A2(
+														$author$project$Main$getLoadingPercentage,
+														model.speedProgress.a,
+														A2($elm$core$Maybe$withDefault, 100, model.speedProgress.b))),
+													' %'
+												])))
 									]))
 							])),
 						A2(
@@ -10006,7 +10162,17 @@ var $author$project$Main$viewStack = function (model) {
 								_List_Nil,
 								_List_fromArray(
 									[
-										$elm$html$Html$text(model.stackStatus)
+										$elm$html$Html$text(
+										$elm$core$String$concat(
+											_List_fromArray(
+												[
+													$elm$core$String$fromInt(
+													A2(
+														$author$project$Main$getLoadingPercentage,
+														model.stackProgress.a,
+														A2($elm$core$Maybe$withDefault, 100, model.stackProgress.b))),
+													' %'
+												])))
 									]))
 							])),
 						A2(
@@ -10409,10 +10575,6 @@ var $elm_community$graph$Graph$fromNodesAndEdges = F2(
 		return $elm_community$graph$Graph$Graph(
 			A3($elm$core$List$foldl, addEdgeIfValid, nodeRep, edges_));
 	});
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
-};
 var $elm_community$graph$Graph$fromNodeLabelsAndEdgePairs = F2(
 	function (labels, edgePairs) {
 		var nodes_ = A3(
@@ -11886,14 +12048,6 @@ var $author$project$ForceDirectedGraph$initGraph = function (myGraph) {
 				},
 				$elm_community$graph$Graph$nodes(graph))));
 };
-var $elm$virtual_dom$VirtualDom$attribute = F2(
-	function (key, value) {
-		return A2(
-			_VirtualDom_attribute,
-			_VirtualDom_noOnOrFormAction(key),
-			_VirtualDom_noJavaScriptOrHtmlUri(value));
-	});
-var $elm_community$typed_svg$TypedSvg$Core$attribute = $elm$virtual_dom$VirtualDom$attribute;
 var $elm_community$typed_svg$TypedSvg$Attributes$class = function (names) {
 	return A2(
 		$elm_community$typed_svg$TypedSvg$Core$attribute,
@@ -12288,7 +12442,7 @@ var $author$project$Main$viewStructure = function (model) {
 								_List_Nil,
 								_List_fromArray(
 									[
-										$elm$html$Html$text('Structure')
+										$elm$html$Html$text(model.domainError)
 									]))
 							])),
 						A2(
@@ -12339,7 +12493,17 @@ var $author$project$Main$viewStructure = function (model) {
 								_List_Nil,
 								_List_fromArray(
 									[
-										$elm$html$Html$text(model.structStatus)
+										$elm$html$Html$text(
+										$elm$core$String$concat(
+											_List_fromArray(
+												[
+													$elm$core$String$fromInt(
+													A2(
+														$author$project$Main$getLoadingPercentage,
+														model.structProgress.a,
+														A2($elm$core$Maybe$withDefault, 100, model.structProgress.b))),
+													' %'
+												])))
 									]))
 							])),
 						A2(
