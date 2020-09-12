@@ -1,19 +1,19 @@
-module Main exposing (..)
+module Main exposing (main)
 
 ----Draggable will be used to check the layout of current and furure elements
 
 import Array exposing (append)
 import Browser
-import Browser.Events as Events exposing (Visibility(..))
 import Dict exposing (Dict)
 import ForceDirectedGraph as FDG
-import Graph exposing (Edge, Graph, Node, NodeId)
-import Html exposing (Html, a, b, br, button, div, h1, h2, hr, i, img, input, label, li, option, p, select, small, span, text, ul)
+import Graph exposing (Graph)
+import Html exposing (Html, a, b, button, div, h1, h2, img, input, label, p, span, text)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onCheck, onClick, onInput)
-import Http exposing (Header, emptyBody)
+import Http exposing (Header)
 import Http.Xml
 import Json.Decode as D
+import ListHelper exposing (..)
 import Round as R
 import Url as U exposing (Url)
 import Xml.Decode as X
@@ -245,6 +245,28 @@ subscriptions model =
 ---- Functions ----
 
 
+createGraph : List StructureItem -> Graph String ()
+createGraph items =
+    let
+        labels =
+            createUniqueList (createListFromItems items)
+
+        dict =
+            createDict (createUniqueList (createListFromItems items))
+    in
+    Graph.fromNodeLabelsAndEdgePairs labels (extractMaybebVal (createLinks items dict))
+
+
+createLinks : List StructureItem -> Dict String Int -> List ( Maybe Int, Maybe Int )
+createLinks list dict =
+    List.map (\record -> ( Dict.get record.source dict, Dict.get record.dest dict )) list
+
+
+createListFromItems : List StructureItem -> List String
+createListFromItems items =
+    List.append (List.map (\record -> record.source) items) (List.map (\record -> record.dest) items)
+
+
 gpstDecoder : D.Decoder SpeedDetails
 gpstDecoder =
     D.map3 SpeedDetails
@@ -305,15 +327,6 @@ renderIf shouldRender elem =
 
     else
         empty
-
-
-removeFromList : Int -> List a -> List a
-removeFromList i xs =
-    List.take i xs ++ List.drop (i + 1) xs
-
-
-
---- For some reason "d.at" doent work with D.at maybe look at it later
 
 
 fetchFromGooglePageSpeedTest : Model -> Maybe Url -> Cmd Msg
@@ -419,71 +432,6 @@ renderTechnologies tech =
                 [ text tech.name ]
             ]
         ]
-
-
-
--------------------List-----------------------------
-
-
-createListFromItems : List StructureItem -> List String
-createListFromItems items =
-    List.append (List.map (\record -> record.source) items) (List.map (\record -> record.dest) items)
-
-
-createUniqueList : List String -> List String
-createUniqueList list =
-    case list of
-        [] ->
-            []
-
-        x :: [] ->
-            x :: []
-
-        x :: xs ->
-            if List.member x xs then
-                createUniqueList xs
-
-            else
-                x :: createUniqueList xs
-
-
-createTupelList : List a -> List ( a, Int )
-createTupelList items =
-    List.indexedMap (\i x -> ( x, i )) items
-
-
-createDict : List String -> Dict String Int
-createDict list =
-    Dict.fromList (createTupelList list)
-
-
-createLinks : List StructureItem -> Dict String Int -> List ( Maybe Int, Maybe Int )
-createLinks list dict =
-    List.map (\record -> ( Dict.get record.source dict, Dict.get record.dest dict )) list
-
-
-extractMaybebVal : List ( Maybe Int, Maybe Int ) -> List ( Int, Int )
-extractMaybebVal list =
-    List.foldr
-        (\mbVal acc ->
-            case mbVal of
-                ( first, second ) ->
-                    case ( first, second ) of
-                        ( Just f, Just s ) ->
-                            if f == s then
-                                acc
-
-                            else
-                                ( f, s ) :: acc
-
-                        ( _, Nothing ) ->
-                            acc
-
-                        ( Nothing, _ ) ->
-                            acc
-        )
-        []
-        list
 
 
 
@@ -783,15 +731,3 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
-
-
-createGraph : List StructureItem -> Graph String ()
-createGraph items =
-    let
-        labels =
-            createUniqueList (createListFromItems items)
-
-        dict =
-            createDict (createUniqueList (createListFromItems items))
-    in
-    Graph.fromNodeLabelsAndEdgePairs labels (extractMaybebVal (createLinks items dict))

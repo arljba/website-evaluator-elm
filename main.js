@@ -10098,7 +10098,7 @@ var $author$project$Main$viewStack = function (model) {
 };
 var $author$project$Main$ExpandStructContent = {$: 'ExpandStructContent'};
 var $author$project$Main$TargetStruct = {$: 'TargetStruct'};
-var $author$project$Main$createTupelList = function (items) {
+var $author$project$ListHelper$createTupelList = function (items) {
 	return A2(
 		$elm$core$List$indexedMap,
 		F2(
@@ -10107,9 +10107,9 @@ var $author$project$Main$createTupelList = function (items) {
 			}),
 		items);
 };
-var $author$project$Main$createDict = function (list) {
+var $author$project$ListHelper$createDict = function (list) {
 	return $elm$core$Dict$fromList(
-		$author$project$Main$createTupelList(list));
+		$author$project$ListHelper$createTupelList(list));
 };
 var $author$project$Main$createLinks = F2(
 	function (list, dict) {
@@ -10147,7 +10147,7 @@ var $elm$core$List$member = F2(
 			},
 			xs);
 	});
-var $author$project$Main$createUniqueList = function (list) {
+var $author$project$ListHelper$createUniqueList = function (list) {
 	createUniqueList:
 	while (true) {
 		if (!list.b) {
@@ -10167,13 +10167,13 @@ var $author$project$Main$createUniqueList = function (list) {
 					return A2(
 						$elm$core$List$cons,
 						x,
-						$author$project$Main$createUniqueList(xs));
+						$author$project$ListHelper$createUniqueList(xs));
 				}
 			}
 		}
 	}
 };
-var $author$project$Main$extractMaybebVal = function (list) {
+var $author$project$ListHelper$extractMaybebVal = function (list) {
 	return A3(
 		$elm$core$List$foldr,
 		F2(
@@ -10488,15 +10488,15 @@ var $elm_community$graph$Graph$fromNodeLabelsAndEdgePairs = F2(
 		return A2($elm_community$graph$Graph$fromNodesAndEdges, nodes_, edges_);
 	});
 var $author$project$Main$createGraph = function (items) {
-	var labels = $author$project$Main$createUniqueList(
+	var labels = $author$project$ListHelper$createUniqueList(
 		$author$project$Main$createListFromItems(items));
-	var dict = $author$project$Main$createDict(
-		$author$project$Main$createUniqueList(
+	var dict = $author$project$ListHelper$createDict(
+		$author$project$ListHelper$createUniqueList(
 			$author$project$Main$createListFromItems(items)));
 	return A2(
 		$elm_community$graph$Graph$fromNodeLabelsAndEdgePairs,
 		labels,
-		$author$project$Main$extractMaybebVal(
+		$author$project$ListHelper$extractMaybebVal(
 			A2($author$project$Main$createLinks, items, dict)));
 };
 var $gampleman$elm_visualization$Force$Center = F2(
