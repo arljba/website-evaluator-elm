@@ -245,54 +245,6 @@ subscriptions model =
 ---- Functions ----
 
 
-renderSpeedDetails : SpeedDetails -> Html Msg
-renderSpeedDetails sd =
-    div [ class "speed-content-section" ]
-        [ div [ class "card" ]
-            [ img [ alt "Server", src "../images/server-solid.svg" ]
-                []
-            , div [ class "container" ]
-                [ h2 []
-                    [ b []
-                        [ text "Server Responstime" ]
-                    ]
-                , p []
-                    [ text (String.concat [ String.fromFloat (sd.serverResponseTime / 1000), " Sekunden" ]) ]
-                ]
-            ]
-        , div [ class "card" ]
-            [ img [ alt "Time untill first content is rendered", src "../images/paint-brush-solid.svg" ]
-                []
-            , div [ class "container" ]
-                [ h2 []
-                    [ b []
-                        [ text "Time untill first content is drawn" ]
-                    ]
-                , p []
-                    [ text (String.concat [ String.fromFloat (sd.firstContentfulPaint / 1000), " Sekunden" ]) ]
-                ]
-            ]
-        , div [ class "card" ]
-            [ img [ alt "Avatar", src "../images/mouse-solid.svg" ]
-                []
-            , div [ class "container" ]
-                [ h2 []
-                    [ b []
-                        [ text "Time untill site is interactive" ]
-                    ]
-                , p []
-                    [ text "Architect & Engineer" ]
-                ]
-            ]
-        ]
-
-
-renderDomainDetails : DomainOwnershipDetails -> Html Msg
-renderDomainDetails dod =
-    div [ class "output" ]
-        [ text (String.concat [ "Orginization: ", dod.organization, "State: ", dod.state, "Country: ", dod.country ]) ]
-
-
 gpstDecoder : D.Decoder SpeedDetails
 gpstDecoder =
     D.map3 SpeedDetails
