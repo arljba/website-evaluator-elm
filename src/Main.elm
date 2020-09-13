@@ -31,7 +31,7 @@ initialModel =
     , domainOwnershipDetails = DomainOwnershipDetails "" "" ""
     , stackDetails = StackDetails []
     , structDetails = StructureDetails []
-    , isValid = False
+    , isValidUrl = False
     , showDomainDetails = False
     , showSpeedDetails = False
     , showStackDetails = False
@@ -75,7 +75,7 @@ update msg model =
             ( { model | showStructDetails = not model.showStructDetails }, Cmd.none )
 
         UrlChange newInput ->
-            ( { model | input = newInput, websiteUrl = U.fromString newInput }, Cmd.none )
+            ( { model | input = newInput, websiteUrl = U.fromString newInput, isValidUrl = (checkForValidity model.websiteUrl) }, Cmd.none )
 
         ApiSelectionChange target bool ->
             case target of
@@ -178,6 +178,11 @@ createListFromItems : List StructureItem -> List String
 createListFromItems items =
     List.append (List.map (\record -> record.source) items) (List.map (\record -> record.dest) items)
 
+checkForValidity : Maybe Url -> Bool
+checkForValidity url = 
+    case url of 
+        Just val -> True
+        Nothing -> False
 
 empty : Html msg
 empty =
@@ -240,7 +245,7 @@ view model =
         , viewSpeed model
         , viewStack model
         , viewStructure model
-        , button [ class "startButton", onClick ClickCheckWebsite ]
+        , button [ class "startButton", onClick ClickCheckWebsite, disabled (not model.isValidUrl) ]
             [ text "Check" ]
         ]
 

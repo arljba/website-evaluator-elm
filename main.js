@@ -5509,7 +5509,7 @@ var $author$project$Main$initialModel = {
 	domainOwnershipDetails: A3($author$project$Types$DomainOwnershipDetails, '', '', ''),
 	domainStatus: 'Not Started',
 	input: '',
-	isValid: false,
+	isValidUrl: false,
 	showDomainDetails: false,
 	showSpeedDetails: false,
 	showStackDetails: false,
@@ -5531,6 +5531,14 @@ var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Main$subscriptions = function (model) {
 	return $elm$core$Platform$Sub$none;
+};
+var $author$project$Main$checkForValidity = function (url) {
+	if (url.$ === 'Just') {
+		var val = url.a;
+		return true;
+	} else {
+		return false;
+	}
 };
 var $author$project$Types$GotStack = function (a) {
 	return {$: 'GotStack', a: a};
@@ -8783,6 +8791,7 @@ var $author$project$Main$update = F2(
 						model,
 						{
 							input: newInput,
+							isValidUrl: $author$project$Main$checkForValidity(model.websiteUrl),
 							websiteUrl: $elm$url$Url$fromString(newInput)
 						}),
 					$elm$core$Platform$Cmd$none);
@@ -8921,6 +8930,15 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 var $elm$html$Html$Attributes$alt = $elm$html$Html$Attributes$stringProperty('alt');
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
+var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$html$Html$img = _VirtualDom_node('img');
 var $elm$html$Html$input = _VirtualDom_node('input');
@@ -8987,14 +9005,6 @@ var $author$project$Types$ApiSelectionChange = F2(
 var $author$project$Types$ExpandDomainContent = {$: 'ExpandDomainContent'};
 var $author$project$Types$TargetDomain = {$: 'TargetDomain'};
 var $elm$html$Html$a = _VirtualDom_node('a');
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $elm$html$Html$Attributes$boolProperty = F2(
-	function (key, bool) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$bool(bool));
-	});
 var $elm$html$Html$Attributes$checked = $elm$html$Html$Attributes$boolProperty('checked');
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$html$Html$label = _VirtualDom_node('label');
@@ -12449,7 +12459,8 @@ var $author$project$Main$view = function (model) {
 				_List_fromArray(
 					[
 						$elm$html$Html$Attributes$class('startButton'),
-						$elm$html$Html$Events$onClick($author$project$Types$ClickCheckWebsite)
+						$elm$html$Html$Events$onClick($author$project$Types$ClickCheckWebsite),
+						$elm$html$Html$Attributes$disabled(!model.isValidUrl)
 					]),
 				_List_fromArray(
 					[

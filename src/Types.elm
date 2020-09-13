@@ -11,7 +11,7 @@ type alias Model =
     , domainOwnershipDetails : DomainOwnershipDetails
     , stackDetails : StackDetails
     , structDetails : StructureDetails
-    , isValid : Bool
+    , isValidUrl : Bool
     , showDomainDetails : Bool
     , showSpeedDetails : Bool
     , showStackDetails : Bool

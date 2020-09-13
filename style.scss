@@ -145,9 +145,9 @@ body {
 }
 
 .header img{
-	margin-left: 55%;
-	width: 3%;
-	height: 3%;
+	margin-left: 5%;
+	width: 2%;
+	height: 2%;
 }
 
 input[type="text"] {
@@ -167,9 +167,9 @@ input[type="text"] {
 .startButton {
 	width: 10%;
 	height: 5%;
-	color: #494949 !important;
+	color: #FBFCFF !important;
 	text-transform: uppercase;
-	background: #ffffff;
+	background: #274156;
 	padding: 5px;
 	margin-left: 20px;
 	margin-top: 5px;
@@ -181,10 +181,14 @@ input[type="text"] {
 }
 
 .startButton:hover {
-	color: #494949 !important;
 	border-radius: 50px;
 	border-color: #494949 !important;
 	transition: all 0.3s ease 0s;
+}
+
+.startButton:disabled,
+.startButton[disabled]{
+  background-color: #B33A3A;
 }
 
 .arrowButton {
