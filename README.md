@@ -45,5 +45,18 @@ To view the result of a given task just hit the arrowbutton on the far right
 ## Documentation
 ### Intent
 The intent of the project is to provide valuabel information about a website which couldnt be retrieved arbitrarely. Alot of enterprieses use sophisticated tools to monitor theyr website and get information like how many people are visiting what pages and how a user traverses the site. Obviously these are informations which cant be retrieved if not for being the owner of said website.This project rather focuses on gathering information which are available to the whole internet. In the following section the diffrent APIs that are being used for this purpose are being listed.
+
 ### APIs
-###
+#### WhoIsApi
+This api basicly functions the same as the whois terminal comand. Whois is a protocol with which information on internet domains and ip addresses and their owners can be queried from a distributed database system. The api does the same and returns the queried result in the xml fomat.
+This api might not work with specific country domains (e.g .de).
+#### GooglePageSpeed
+This api checks how fast content on a website can be served to a user. Additionaly it returns an audit where tips are given how the website could be made faster. This api is used to get responsetime of the host server, the time it takes untill the first content is rendered and the time untill the page is interactive.
+#### BuiltWithApi
+This api returns the technology stack which is beeing used on a website. An example would be a website uses drupal as a cms apache as a webserver etc. Calls to this api are highly ristricted with a free license. 
+#### CustomApi
+The last api that is being used is an api written and hosted by myself. This api retrieves information about how pages on a website are being connected and also if these connections are not broken (dont return 400-500 codes).
+The endpoint is available at http://arne-baumann.de:9080/ and the project can be viewed [here](https://github.com/arljba/website-evaluator-crawler).
+
+### Next Steps
+The next step of the project would be to replace the highly restrictivy apis that are currently being used (e.g BuiltWithApi) and replace them with self developed apis.
