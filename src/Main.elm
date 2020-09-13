@@ -2,6 +2,7 @@ module Main exposing (main)
 
 ----Draggable will be used to check the layout of current and furure elements
 
+import Api exposing (..)
 import Array exposing (append)
 import Browser
 import Dict exposing (Dict)
@@ -15,32 +16,13 @@ import Http.Xml
 import Json.Decode as D
 import ListHelper exposing (..)
 import Round as R
+import Types exposing (..)
 import Url as U exposing (Url)
 import Xml.Decode as X
 
 
 
 ---- MODEL ----
-
-
-type alias Model =
-    { input : String
-    , websiteUrl : Maybe Url
-    , speedDetails : SpeedDetails
-    , domainOwnershipDetails : DomainOwnershipDetails
-    , stackDetails : StackDetails
-    , structDetails : StructureDetails
-    , isValid : Bool
-    , showDomainDetails : Bool
-    , showSpeedDetails : Bool
-    , showStackDetails : Bool
-    , showStructDetails : Bool
-    , apiSelection : ApiSelection
-    , domainStatus : String
-    , speedStatus : String
-    , stackStatus : String
-    , structStatus : String
-    }
 
 
 initialModel : Model
@@ -71,21 +53,6 @@ init _ =
 
 
 ---- UPDATE ----
-
-
-type Msg
-    = ClickCheckWebsite
-    | ClearModel
-    | GotSpeed (Result Http.Error SpeedDetails)
-    | GotDomain (Result Http.Error DomainOwnershipDetails)
-    | GotStack (Result Http.Error StackDetails)
-    | GotStructure (Result Http.Error StructureDetails)
-    | UrlChange String
-    | ExpandDomainContent
-    | ExpandSpeedContent
-    | ExpandStackContent
-    | ExpandStructContent
-    | ApiSelectionChange Target Bool
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -160,58 +127,16 @@ update msg model =
 
 
 
----- Custom Types ----
+---- Subscriptions ----
 
 
-type alias SpeedDetails =
-    { timeToInteractive : Float
-    , firstContentfulPaint : Float
-    , serverResponseTime : Float
-    }
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
 
 
-type alias DomainOwnershipDetails =
-    { organization : String
-    , state : String
-    , country : String
-    }
 
-
-type alias StackDetails =
-    { technologies : List Technologie
-    }
-
-
-type alias Technologie =
-    { name : String
-    , categories : String
-    }
-
-
-type alias StructureDetails =
-    { items : List StructureItem }
-
-
-type alias StructureItem =
-    { source : String
-    , dest : String
-    , status : Int
-    }
-
-
-type Target
-    = TargetDomain
-    | TargetSpeed
-    | TargetStack
-    | TargetStruct
-
-
-type alias ApiSelection =
-    { domainSelected : Bool
-    , speedSelected : Bool
-    , stackSelected : Bool
-    , structureSelected : Bool
-    }
+---- Functions ----
 
 
 toggleDomainSelected : ApiSelection -> ApiSelection
@@ -232,19 +157,6 @@ toggleStackSelected selection =
 toggleStructSelected : ApiSelection -> ApiSelection
 toggleStructSelected selection =
     { selection | structureSelected = not selection.structureSelected }
-
-
-
----- Subscriptions ----
-
-
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
-
-
-
----- Functions ----
 
 
 createGraph : List StructureItem -> Graph String ()
@@ -269,54 +181,6 @@ createListFromItems items =
     List.append (List.map (\record -> record.source) items) (List.map (\record -> record.dest) items)
 
 
-gpstDecoder : D.Decoder SpeedDetails
-gpstDecoder =
-    D.map3 SpeedDetails
-        (D.field "lighthouseResult" (D.field "audits" (D.field "interactive" (D.field "numericValue" D.float))))
-        (D.field "lighthouseResult" (D.field "audits" (D.field "first-contentful-paint" (D.field "numericValue" D.float))))
-        (D.field "lighthouseResult" (D.field "audits" (D.field "server-response-time" (D.field "numericValue" D.float))))
-
-
-wixDecoder : X.Decoder DomainOwnershipDetails
-wixDecoder =
-    X.map3 DomainOwnershipDetails
-        (X.path [ "registrant", "organization" ] (X.single X.string))
-        (X.path [ "registrant", "state" ] (X.single X.string))
-        (X.path [ "registrant", "country" ] (X.single X.string))
-
-
-extractWapDecoder : D.Decoder StackDetails
-extractWapDecoder =
-    D.field "Results" (D.index 0 (D.at [ "Result", "Paths" ] (D.index 0 wapDecoder)))
-
-
-wapDecoder : D.Decoder StackDetails
-wapDecoder =
-    D.map StackDetails
-        (D.field "Technologies" (D.list techDecoder))
-
-
-techDecoder : D.Decoder Technologie
-techDecoder =
-    D.map2 Technologie
-        (D.field "Name" D.string)
-        (D.field "Tag" D.string)
-
-
-crawlDecoder : D.Decoder StructureDetails
-crawlDecoder =
-    D.map StructureDetails
-        (D.field "items" (D.list itemDecoder))
-
-
-itemDecoder : D.Decoder StructureItem
-itemDecoder =
-    D.map3 StructureItem
-        (D.field "url_src" D.string)
-        (D.field "url_dest" D.string)
-        (D.field "status" D.int)
-
-
 empty : Html msg
 empty =
     Html.text ""
@@ -329,74 +193,6 @@ renderIf shouldRender elem =
 
     else
         empty
-
-
-fetchFromGooglePageSpeedTest : Model -> Maybe Url -> Cmd Msg
-fetchFromGooglePageSpeedTest model websiteUrl =
-    case websiteUrl of
-        Just url ->
-            if model.apiSelection.speedSelected then
-                Http.get
-                    { url = String.concat [ "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=", U.toString url, "&key=AIzaSyBfcmkhsGWVmLlVYn0YkTk6dDZFrcbbXV4&category=PERFORMANCE&strategy=DESKTOP" ]
-                    , expect = Http.expectJson GotSpeed gpstDecoder
-                    }
-
-            else
-                Cmd.none
-
-        Nothing ->
-            Cmd.none
-
-
-fetchFromWhoIsXML : Model -> Maybe Url -> Cmd Msg
-fetchFromWhoIsXML model websiteUrl =
-    case websiteUrl of
-        Just url ->
-            if model.apiSelection.domainSelected then
-                Http.get
-                    { url = String.concat [ "https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_XRwFO1KDNvYMqdy0QfkAGpMhB7i58&domainName=", U.toString url ]
-                    , expect = Http.Xml.expectXml GotDomain wixDecoder
-                    }
-
-            else
-                Cmd.none
-
-        Nothing ->
-            Cmd.none
-
-
-fetchFromBuiltwith : Model -> Maybe Url -> Cmd Msg
-fetchFromBuiltwith model websiteUrl =
-    case websiteUrl of
-        Just url ->
-            if model.apiSelection.stackSelected then
-                Http.get
-                    { url = String.concat [ "https://api.builtwith.com/v17/api.json?KEY=8e1d176e-26be-4379-8f60-79d46a255c0d&LOOKUP=", U.toString url, "&HIDEDL=no" ]
-                    , expect = Http.expectJson GotStack extractWapDecoder
-                    }
-
-            else
-                Cmd.none
-
-        Nothing ->
-            Cmd.none
-
-
-fetchFromCrawler : Model -> Maybe Url -> Cmd Msg
-fetchFromCrawler model websiteUrl =
-    case websiteUrl of
-        Just url ->
-            if model.apiSelection.structureSelected then
-                Http.get
-                    { url = String.concat [ "http://arne-baumann.de:9080/crawl.json?spider_name=linkspider&start_requests=true&domain=", url.host, "&starturl=", U.toString url ]
-                    , expect = Http.expectJson GotStructure crawlDecoder
-                    }
-
-            else
-                Cmd.none
-
-        Nothing ->
-            Cmd.none
 
 
 errorToString : Http.Error -> String
@@ -422,18 +218,6 @@ errorToString error =
 
         Http.BadBody _ ->
             "Cant parse body"
-
-
-renderTechnologies : Technologie -> Html Msg
-renderTechnologies tech =
-    div [ class "card" ]
-        [ div [ class "card-header" ]
-            [ text tech.categories ]
-        , div [ class "card-main" ]
-            [ div [ class "main-description" ]
-                [ text tech.name ]
-            ]
-        ]
 
 
 
@@ -642,6 +426,18 @@ viewExpandStack model =
                 renderTechnologies
                 model.stackDetails.technologies
             )
+        ]
+
+
+renderTechnologies : Technologie -> Html Msg
+renderTechnologies tech =
+    div [ class "card" ]
+        [ div [ class "card-header" ]
+            [ text tech.categories ]
+        , div [ class "card-main" ]
+            [ div [ class "main-description" ]
+                [ text tech.name ]
+            ]
         ]
 
 

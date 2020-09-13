@@ -5486,27 +5486,27 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
-var $author$project$Main$ApiSelection = F4(
+var $author$project$Types$ApiSelection = F4(
 	function (domainSelected, speedSelected, stackSelected, structureSelected) {
 		return {domainSelected: domainSelected, speedSelected: speedSelected, stackSelected: stackSelected, structureSelected: structureSelected};
 	});
-var $author$project$Main$DomainOwnershipDetails = F3(
+var $author$project$Types$DomainOwnershipDetails = F3(
 	function (organization, state, country) {
 		return {country: country, organization: organization, state: state};
 	});
-var $author$project$Main$SpeedDetails = F3(
+var $author$project$Types$SpeedDetails = F3(
 	function (timeToInteractive, firstContentfulPaint, serverResponseTime) {
 		return {firstContentfulPaint: firstContentfulPaint, serverResponseTime: serverResponseTime, timeToInteractive: timeToInteractive};
 	});
-var $author$project$Main$StackDetails = function (technologies) {
+var $author$project$Types$StackDetails = function (technologies) {
 	return {technologies: technologies};
 };
-var $author$project$Main$StructureDetails = function (items) {
+var $author$project$Types$StructureDetails = function (items) {
 	return {items: items};
 };
 var $author$project$Main$initialModel = {
-	apiSelection: A4($author$project$Main$ApiSelection, false, false, false, false),
-	domainOwnershipDetails: A3($author$project$Main$DomainOwnershipDetails, '', '', ''),
+	apiSelection: A4($author$project$Types$ApiSelection, false, false, false, false),
+	domainOwnershipDetails: A3($author$project$Types$DomainOwnershipDetails, '', '', ''),
 	domainStatus: 'Not Started',
 	input: '',
 	isValid: false,
@@ -5514,11 +5514,11 @@ var $author$project$Main$initialModel = {
 	showSpeedDetails: false,
 	showStackDetails: false,
 	showStructDetails: false,
-	speedDetails: A3($author$project$Main$SpeedDetails, 0, 0, 0),
+	speedDetails: A3($author$project$Types$SpeedDetails, 0, 0, 0),
 	speedStatus: 'Not Started',
-	stackDetails: $author$project$Main$StackDetails(_List_Nil),
+	stackDetails: $author$project$Types$StackDetails(_List_Nil),
 	stackStatus: 'Not Started',
-	structDetails: $author$project$Main$StructureDetails(_List_Nil),
+	structDetails: $author$project$Types$StructureDetails(_List_Nil),
 	structStatus: 'Not Started',
 	websiteUrl: $elm$core$Maybe$Nothing
 };
@@ -5532,7 +5532,7 @@ var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Main$subscriptions = function (model) {
 	return $elm$core$Platform$Sub$none;
 };
-var $author$project$Main$GotStack = function (a) {
+var $author$project$Types$GotStack = function (a) {
 	return {$: 'GotStack', a: a};
 };
 var $elm$core$String$concat = function (strings) {
@@ -6159,24 +6159,24 @@ var $elm$json$Json$Decode$at = F2(
 	});
 var $elm$json$Json$Decode$index = _Json_decodeIndex;
 var $elm$json$Json$Decode$list = _Json_decodeList;
-var $author$project$Main$Technologie = F2(
+var $author$project$Types$Technologie = F2(
 	function (name, categories) {
 		return {categories: categories, name: name};
 	});
 var $elm$json$Json$Decode$string = _Json_decodeString;
-var $author$project$Main$techDecoder = A3(
+var $author$project$Api$techDecoder = A3(
 	$elm$json$Json$Decode$map2,
-	$author$project$Main$Technologie,
+	$author$project$Types$Technologie,
 	A2($elm$json$Json$Decode$field, 'Name', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'Tag', $elm$json$Json$Decode$string));
-var $author$project$Main$wapDecoder = A2(
+var $author$project$Api$wapDecoder = A2(
 	$elm$json$Json$Decode$map,
-	$author$project$Main$StackDetails,
+	$author$project$Types$StackDetails,
 	A2(
 		$elm$json$Json$Decode$field,
 		'Technologies',
-		$elm$json$Json$Decode$list($author$project$Main$techDecoder)));
-var $author$project$Main$extractWapDecoder = A2(
+		$elm$json$Json$Decode$list($author$project$Api$techDecoder)));
+var $author$project$Api$extractWapDecoder = A2(
 	$elm$json$Json$Decode$field,
 	'Results',
 	A2(
@@ -6186,7 +6186,7 @@ var $author$project$Main$extractWapDecoder = A2(
 			$elm$json$Json$Decode$at,
 			_List_fromArray(
 				['Result', 'Paths']),
-			A2($elm$json$Json$Decode$index, 0, $author$project$Main$wapDecoder))));
+			A2($elm$json$Json$Decode$index, 0, $author$project$Api$wapDecoder))));
 var $elm$http$Http$emptyBody = _Http_emptyBody;
 var $elm$http$Http$Request = function (a) {
 	return {$: 'Request', a: a};
@@ -6404,13 +6404,13 @@ var $elm$url$Url$toString = function (url) {
 					_Utils_ap(http, url.host)),
 				url.path)));
 };
-var $author$project$Main$fetchFromBuiltwith = F2(
+var $author$project$Api$fetchFromBuiltwith = F2(
 	function (model, websiteUrl) {
 		if (websiteUrl.$ === 'Just') {
 			var url = websiteUrl.a;
 			return model.apiSelection.stackSelected ? $elm$http$Http$get(
 				{
-					expect: A2($elm$http$Http$expectJson, $author$project$Main$GotStack, $author$project$Main$extractWapDecoder),
+					expect: A2($elm$http$Http$expectJson, $author$project$Types$GotStack, $author$project$Api$extractWapDecoder),
 					url: $elm$core$String$concat(
 						_List_fromArray(
 							[
@@ -6423,35 +6423,35 @@ var $author$project$Main$fetchFromBuiltwith = F2(
 			return $elm$core$Platform$Cmd$none;
 		}
 	});
-var $author$project$Main$GotStructure = function (a) {
+var $author$project$Types$GotStructure = function (a) {
 	return {$: 'GotStructure', a: a};
 };
-var $author$project$Main$StructureItem = F3(
+var $author$project$Types$StructureItem = F3(
 	function (source, dest, status) {
 		return {dest: dest, source: source, status: status};
 	});
 var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$json$Json$Decode$map3 = _Json_map3;
-var $author$project$Main$itemDecoder = A4(
+var $author$project$Api$itemDecoder = A4(
 	$elm$json$Json$Decode$map3,
-	$author$project$Main$StructureItem,
+	$author$project$Types$StructureItem,
 	A2($elm$json$Json$Decode$field, 'url_src', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'url_dest', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'status', $elm$json$Json$Decode$int));
-var $author$project$Main$crawlDecoder = A2(
+var $author$project$Api$crawlDecoder = A2(
 	$elm$json$Json$Decode$map,
-	$author$project$Main$StructureDetails,
+	$author$project$Types$StructureDetails,
 	A2(
 		$elm$json$Json$Decode$field,
 		'items',
-		$elm$json$Json$Decode$list($author$project$Main$itemDecoder)));
-var $author$project$Main$fetchFromCrawler = F2(
+		$elm$json$Json$Decode$list($author$project$Api$itemDecoder)));
+var $author$project$Api$fetchFromCrawler = F2(
 	function (model, websiteUrl) {
 		if (websiteUrl.$ === 'Just') {
 			var url = websiteUrl.a;
 			return model.apiSelection.structureSelected ? $elm$http$Http$get(
 				{
-					expect: A2($elm$http$Http$expectJson, $author$project$Main$GotStructure, $author$project$Main$crawlDecoder),
+					expect: A2($elm$http$Http$expectJson, $author$project$Types$GotStructure, $author$project$Api$crawlDecoder),
 					url: $elm$core$String$concat(
 						_List_fromArray(
 							[
@@ -6465,13 +6465,13 @@ var $author$project$Main$fetchFromCrawler = F2(
 			return $elm$core$Platform$Cmd$none;
 		}
 	});
-var $author$project$Main$GotSpeed = function (a) {
+var $author$project$Types$GotSpeed = function (a) {
 	return {$: 'GotSpeed', a: a};
 };
 var $elm$json$Json$Decode$float = _Json_decodeFloat;
-var $author$project$Main$gpstDecoder = A4(
+var $author$project$Api$gpstDecoder = A4(
 	$elm$json$Json$Decode$map3,
-	$author$project$Main$SpeedDetails,
+	$author$project$Types$SpeedDetails,
 	A2(
 		$elm$json$Json$Decode$field,
 		'lighthouseResult',
@@ -6502,13 +6502,13 @@ var $author$project$Main$gpstDecoder = A4(
 				$elm$json$Json$Decode$field,
 				'server-response-time',
 				A2($elm$json$Json$Decode$field, 'numericValue', $elm$json$Json$Decode$float)))));
-var $author$project$Main$fetchFromGooglePageSpeedTest = F2(
+var $author$project$Api$fetchFromGooglePageSpeedTest = F2(
 	function (model, websiteUrl) {
 		if (websiteUrl.$ === 'Just') {
 			var url = websiteUrl.a;
 			return model.apiSelection.speedSelected ? $elm$http$Http$get(
 				{
-					expect: A2($elm$http$Http$expectJson, $author$project$Main$GotSpeed, $author$project$Main$gpstDecoder),
+					expect: A2($elm$http$Http$expectJson, $author$project$Types$GotSpeed, $author$project$Api$gpstDecoder),
 					url: $elm$core$String$concat(
 						_List_fromArray(
 							[
@@ -6521,7 +6521,7 @@ var $author$project$Main$fetchFromGooglePageSpeedTest = F2(
 			return $elm$core$Platform$Cmd$none;
 		}
 	});
-var $author$project$Main$GotDomain = function (a) {
+var $author$project$Types$GotDomain = function (a) {
 	return {$: 'GotDomain', a: a};
 };
 var $ymtszw$elm_xml_decode$Xml$Decode$decodeXml = F2(
@@ -8680,9 +8680,9 @@ var $ymtszw$elm_xml_decode$Xml$Decode$cdata = function (generator) {
 		$ymtszw$elm_xml_decode$Xml$Decode$cdataImpl(generator));
 };
 var $ymtszw$elm_xml_decode$Xml$Decode$string = $ymtszw$elm_xml_decode$Xml$Decode$cdata($elm$core$Result$Ok);
-var $author$project$Main$wixDecoder = A4(
+var $author$project$Api$wixDecoder = A4(
 	$ymtszw$elm_xml_decode$Xml$Decode$map3,
-	$author$project$Main$DomainOwnershipDetails,
+	$author$project$Types$DomainOwnershipDetails,
 	A2(
 		$ymtszw$elm_xml_decode$Xml$Decode$path,
 		_List_fromArray(
@@ -8698,13 +8698,13 @@ var $author$project$Main$wixDecoder = A4(
 		_List_fromArray(
 			['registrant', 'country']),
 		$ymtszw$elm_xml_decode$Xml$Decode$single($ymtszw$elm_xml_decode$Xml$Decode$string)));
-var $author$project$Main$fetchFromWhoIsXML = F2(
+var $author$project$Api$fetchFromWhoIsXML = F2(
 	function (model, websiteUrl) {
 		if (websiteUrl.$ === 'Just') {
 			var url = websiteUrl.a;
 			return model.apiSelection.domainSelected ? $elm$http$Http$get(
 				{
-					expect: A2($ymtszw$elm_http_xml$Http$Xml$expectXml, $author$project$Main$GotDomain, $author$project$Main$wixDecoder),
+					expect: A2($ymtszw$elm_http_xml$Http$Xml$expectXml, $author$project$Types$GotDomain, $author$project$Api$wixDecoder),
 					url: $elm$core$String$concat(
 						_List_fromArray(
 							[
@@ -8745,10 +8745,10 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$batch(
 						_List_fromArray(
 							[
-								A2($author$project$Main$fetchFromWhoIsXML, model, model.websiteUrl),
-								A2($author$project$Main$fetchFromGooglePageSpeedTest, model, model.websiteUrl),
-								A2($author$project$Main$fetchFromBuiltwith, model, model.websiteUrl),
-								A2($author$project$Main$fetchFromCrawler, model, model.websiteUrl)
+								A2($author$project$Api$fetchFromWhoIsXML, model, model.websiteUrl),
+								A2($author$project$Api$fetchFromGooglePageSpeedTest, model, model.websiteUrl),
+								A2($author$project$Api$fetchFromBuiltwith, model, model.websiteUrl),
+								A2($author$project$Api$fetchFromCrawler, model, model.websiteUrl)
 							])));
 			case 'ClearModel':
 				return _Utils_Tuple2($author$project$Main$initialModel, $elm$core$Platform$Cmd$none);
@@ -8831,7 +8831,7 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								speedDetails: A3($author$project$Main$SpeedDetails, details.timeToInteractive, details.firstContentfulPaint, details.serverResponseTime),
+								speedDetails: A3($author$project$Types$SpeedDetails, details.timeToInteractive, details.firstContentfulPaint, details.serverResponseTime),
 								speedStatus: 'Sucess'
 							}),
 						$elm$core$Platform$Cmd$none);
@@ -8851,7 +8851,7 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								domainOwnershipDetails: A3($author$project$Main$DomainOwnershipDetails, details.organization, details.state, details.country),
+								domainOwnershipDetails: A3($author$project$Types$DomainOwnershipDetails, details.organization, details.state, details.country),
 								domainStatus: 'Sucess'
 							}),
 						$elm$core$Platform$Cmd$none);
@@ -8871,7 +8871,7 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								stackDetails: $author$project$Main$StackDetails(details.technologies),
+								stackDetails: $author$project$Types$StackDetails(details.technologies),
 								stackStatus: 'Sucess'
 							}),
 						$elm$core$Platform$Cmd$none);
@@ -8891,7 +8891,7 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								structDetails: $author$project$Main$StructureDetails(details.items),
+								structDetails: $author$project$Types$StructureDetails(details.items),
 								structStatus: 'Sucess'
 							}),
 						$elm$core$Platform$Cmd$none);
@@ -8905,9 +8905,9 @@ var $author$project$Main$update = F2(
 				}
 		}
 	});
-var $author$project$Main$ClearModel = {$: 'ClearModel'};
-var $author$project$Main$ClickCheckWebsite = {$: 'ClickCheckWebsite'};
-var $author$project$Main$UrlChange = function (a) {
+var $author$project$Types$ClearModel = {$: 'ClearModel'};
+var $author$project$Types$ClickCheckWebsite = {$: 'ClickCheckWebsite'};
+var $author$project$Types$UrlChange = function (a) {
 	return {$: 'UrlChange', a: a};
 };
 var $elm$json$Json$Encode$string = _Json_wrap;
@@ -8980,12 +8980,12 @@ var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
-var $author$project$Main$ApiSelectionChange = F2(
+var $author$project$Types$ApiSelectionChange = F2(
 	function (a, b) {
 		return {$: 'ApiSelectionChange', a: a, b: b};
 	});
-var $author$project$Main$ExpandDomainContent = {$: 'ExpandDomainContent'};
-var $author$project$Main$TargetDomain = {$: 'TargetDomain'};
+var $author$project$Types$ExpandDomainContent = {$: 'ExpandDomainContent'};
+var $author$project$Types$TargetDomain = {$: 'TargetDomain'};
 var $elm$html$Html$a = _VirtualDom_node('a');
 var $elm$json$Json$Encode$bool = _Json_wrap;
 var $elm$html$Html$Attributes$boolProperty = F2(
@@ -9203,7 +9203,7 @@ var $author$project$Main$viewDomain = function (model) {
 												$elm$html$Html$Attributes$type_('checkbox'),
 												$elm$html$Html$Attributes$checked(model.apiSelection.domainSelected),
 												$elm$html$Html$Events$onCheck(
-												$author$project$Main$ApiSelectionChange($author$project$Main$TargetDomain))
+												$author$project$Types$ApiSelectionChange($author$project$Types$TargetDomain))
 											]),
 										_List_Nil),
 										A2(
@@ -9244,7 +9244,7 @@ var $author$project$Main$viewDomain = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$Attributes$class('arrowButton'),
-										$elm$html$Html$Events$onClick($author$project$Main$ExpandDomainContent)
+										$elm$html$Html$Events$onClick($author$project$Types$ExpandDomainContent)
 									]),
 								_List_fromArray(
 									[
@@ -9353,8 +9353,8 @@ var $author$project$Main$viewInfo = A2(
 						]))
 				]))
 		]));
-var $author$project$Main$ExpandSpeedContent = {$: 'ExpandSpeedContent'};
-var $author$project$Main$TargetSpeed = {$: 'TargetSpeed'};
+var $author$project$Types$ExpandSpeedContent = {$: 'ExpandSpeedContent'};
+var $author$project$Types$TargetSpeed = {$: 'TargetSpeed'};
 var $elm$core$Basics$ge = _Utils_ge;
 var $elm$core$Basics$abs = function (n) {
 	return (n < 0) ? (-n) : n;
@@ -9797,7 +9797,7 @@ var $author$project$Main$viewSpeed = function (model) {
 												$elm$html$Html$Attributes$type_('checkbox'),
 												$elm$html$Html$Attributes$checked(model.apiSelection.speedSelected),
 												$elm$html$Html$Events$onCheck(
-												$author$project$Main$ApiSelectionChange($author$project$Main$TargetSpeed))
+												$author$project$Types$ApiSelectionChange($author$project$Types$TargetSpeed))
 											]),
 										_List_Nil),
 										A2(
@@ -9838,7 +9838,7 @@ var $author$project$Main$viewSpeed = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$Attributes$class('arrowButton'),
-										$elm$html$Html$Events$onClick($author$project$Main$ExpandSpeedContent)
+										$elm$html$Html$Events$onClick($author$project$Types$ExpandSpeedContent)
 									]),
 								_List_fromArray(
 									[
@@ -9865,8 +9865,8 @@ var $author$project$Main$viewSpeed = function (model) {
 				$author$project$Main$viewExpandSpeed(model))
 			]));
 };
-var $author$project$Main$ExpandStackContent = {$: 'ExpandStackContent'};
-var $author$project$Main$TargetStack = {$: 'TargetStack'};
+var $author$project$Types$ExpandStackContent = {$: 'ExpandStackContent'};
+var $author$project$Types$TargetStack = {$: 'TargetStack'};
 var $author$project$Main$renderTechnologies = function (tech) {
 	return A2(
 		$elm$html$Html$div,
@@ -9981,7 +9981,7 @@ var $author$project$Main$viewStack = function (model) {
 												$elm$html$Html$Attributes$type_('checkbox'),
 												$elm$html$Html$Attributes$checked(model.apiSelection.stackSelected),
 												$elm$html$Html$Events$onCheck(
-												$author$project$Main$ApiSelectionChange($author$project$Main$TargetStack))
+												$author$project$Types$ApiSelectionChange($author$project$Types$TargetStack))
 											]),
 										_List_Nil),
 										A2(
@@ -10022,7 +10022,7 @@ var $author$project$Main$viewStack = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$Attributes$class('arrowButton'),
-										$elm$html$Html$Events$onClick($author$project$Main$ExpandStackContent)
+										$elm$html$Html$Events$onClick($author$project$Types$ExpandStackContent)
 									]),
 								_List_fromArray(
 									[
@@ -10049,8 +10049,8 @@ var $author$project$Main$viewStack = function (model) {
 				$author$project$Main$viewExpandStack(model))
 			]));
 };
-var $author$project$Main$ExpandStructContent = {$: 'ExpandStructContent'};
-var $author$project$Main$TargetStruct = {$: 'TargetStruct'};
+var $author$project$Types$ExpandStructContent = {$: 'ExpandStructContent'};
+var $author$project$Types$TargetStruct = {$: 'TargetStruct'};
 var $author$project$ListHelper$createTupelList = function (items) {
 	return A2(
 		$elm$core$List$indexedMap,
@@ -12314,7 +12314,7 @@ var $author$project$Main$viewStructure = function (model) {
 												$elm$html$Html$Attributes$type_('checkbox'),
 												$elm$html$Html$Attributes$checked(model.apiSelection.structureSelected),
 												$elm$html$Html$Events$onCheck(
-												$author$project$Main$ApiSelectionChange($author$project$Main$TargetStruct))
+												$author$project$Types$ApiSelectionChange($author$project$Types$TargetStruct))
 											]),
 										_List_Nil),
 										A2(
@@ -12355,7 +12355,7 @@ var $author$project$Main$viewStructure = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$Attributes$class('arrowButton'),
-										$elm$html$Html$Events$onClick($author$project$Main$ExpandStructContent)
+										$elm$html$Html$Events$onClick($author$project$Types$ExpandStructContent)
 									]),
 								_List_fromArray(
 									[
@@ -12415,7 +12415,7 @@ var $author$project$Main$view = function (model) {
 										$elm$html$Html$Attributes$placeholder('http://'),
 										$elm$html$Html$Attributes$type_('text'),
 										$elm$html$Html$Attributes$value(model.input),
-										$elm$html$Html$Events$onInput($author$project$Main$UrlChange)
+										$elm$html$Html$Events$onInput($author$project$Types$UrlChange)
 									]),
 								_List_Nil),
 								A2(
@@ -12423,7 +12423,7 @@ var $author$project$Main$view = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$Attributes$class('searchclear'),
-										$elm$html$Html$Events$onClick($author$project$Main$ClearModel)
+										$elm$html$Html$Events$onClick($author$project$Types$ClearModel)
 									]),
 								_List_fromArray(
 									[
@@ -12449,7 +12449,7 @@ var $author$project$Main$view = function (model) {
 				_List_fromArray(
 					[
 						$elm$html$Html$Attributes$class('startButton'),
-						$elm$html$Html$Events$onClick($author$project$Main$ClickCheckWebsite)
+						$elm$html$Html$Events$onClick($author$project$Types$ClickCheckWebsite)
 					]),
 				_List_fromArray(
 					[
