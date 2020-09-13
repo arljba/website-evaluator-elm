@@ -6,14 +6,12 @@ import Api exposing (..)
 import Array exposing (append)
 import Browser
 import Dict exposing (Dict)
-import ForceDirectedGraph as FDG
+import ForceDirectedGraph exposing (initGraph, viewGraph)
 import Graph exposing (Graph)
 import Html exposing (Html, a, b, button, div, h1, h2, img, input, label, p, span, text)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onCheck, onClick, onInput)
-import Http exposing (Header)
-import Http.Xml
-import Json.Decode as D
+import Http exposing (Error)
 import ListHelper exposing (..)
 import Round as R
 import Types exposing (..)
@@ -508,7 +506,7 @@ viewExpandStruct model =
             String.fromInt (List.length (model.structDetails.items |> List.filter (\record -> record.status /= 200)))
     in
     div [ class "struct-content-section" ]
-        [ FDG.initGraph (createGraph model.structDetails.items) |> FDG.viewGraph
+        [ initGraph (createGraph model.structDetails.items) |> viewGraph
         , div [ class "card" ]
             [ div [ class "container" ]
                 [ h1 []

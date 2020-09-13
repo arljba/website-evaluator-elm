@@ -1,4 +1,4 @@
-module Api exposing (..)
+module Api exposing (fetchFromGooglePageSpeedTest,fetchFromWhoIsXML,fetchFromBuiltwith,fetchFromCrawler)
 
 import Http exposing (Header)
 import Http.Xml
