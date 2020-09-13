@@ -277,7 +277,7 @@ viewDomain model =
                     ]
                 ]
             ]
-        , viewExpandDomain model |> renderIf model.showDomainDetails
+        , viewExpandDomain model |> renderIf (model.showDomainDetails && model.domainStatus == "Sucess")
         ]
 
 
@@ -346,7 +346,7 @@ viewSpeed model =
                     ]
                 ]
             ]
-        , viewExpandSpeed model |> renderIf model.showSpeedDetails
+        , viewExpandSpeed model |> renderIf (model.showSpeedDetails && model.speedStatus == "Sucess")
         ]
 
 
@@ -415,7 +415,7 @@ viewStack model =
                     ]
                 ]
             ]
-        , viewExpandStack model |> renderIf model.showStackDetails
+        , viewExpandStack model |> renderIf (model.showStackDetails && model.stackStatus == "Sucess")
         ]
 
 
@@ -495,7 +495,7 @@ viewStructure model =
                     ]
                 ]
             ]
-        , viewExpandStruct model |> renderIf model.showStructDetails
+        , viewExpandStruct model |> renderIf (model.showStructDetails && model.structStatus == "Sucess")
         ]
 
 

@@ -9277,7 +9277,7 @@ var $author$project$Main$viewDomain = function (model) {
 					])),
 				A2(
 				$author$project$Main$renderIf,
-				model.showDomainDetails,
+				model.showDomainDetails && (model.domainStatus === 'Sucess'),
 				$author$project$Main$viewExpandDomain(model))
 			]));
 };
@@ -9871,7 +9871,7 @@ var $author$project$Main$viewSpeed = function (model) {
 					])),
 				A2(
 				$author$project$Main$renderIf,
-				model.showSpeedDetails,
+				model.showSpeedDetails && (model.speedStatus === 'Sucess'),
 				$author$project$Main$viewExpandSpeed(model))
 			]));
 };
@@ -10055,7 +10055,7 @@ var $author$project$Main$viewStack = function (model) {
 					])),
 				A2(
 				$author$project$Main$renderIf,
-				model.showStackDetails,
+				model.showStackDetails && (model.stackStatus === 'Sucess'),
 				$author$project$Main$viewExpandStack(model))
 			]));
 };
@@ -12388,7 +12388,7 @@ var $author$project$Main$viewStructure = function (model) {
 					])),
 				A2(
 				$author$project$Main$renderIf,
-				model.showStructDetails,
+				model.showStructDetails && (model.structStatus === 'Sucess'),
 				$author$project$Main$viewExpandStruct(model))
 			]));
 };
