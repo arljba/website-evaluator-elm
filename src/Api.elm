@@ -48,7 +48,7 @@ fetchFromBuiltwith model websiteUrl =
         Just url ->
             if model.apiSelection.stackSelected then
                 Http.get
-                    { url = String.concat [ "https://api.builtwith.com/v17/api.json?KEY=8e1d176e-26be-4379-8f60-79d46a255c0d&LOOKUP=", U.toString url, "&HIDEDL=no" ]
+                    { url = String.concat [ "https://api.builtwith.com/v17/api.json?KEY=3d993c48-5c46-4f64-8ba7-7cf9cace11fb&LOOKUP=", U.toString url, "&HIDEDL=no" ]
                     , expect = Http.expectJson GotStack extractWapDecoder
                     }
 
