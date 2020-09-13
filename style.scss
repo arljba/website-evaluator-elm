@@ -32,7 +32,7 @@ body {
 
 .detail-section h1 {
 	margin: 0px;
-	font-size: 13px;
+	font-size: 14px;
 }
 
 .detail-section p {
@@ -260,6 +260,12 @@ input[type="text"] {
 	display: flex;
 	flex-wrap: wrap;
 	text-align: center;
+}
+
+.struct-content-section h1 {
+	margin-left : 2%;
+	position: absolute;
+	font-size: 16px;
 }
 
 .struct-content-section .card {

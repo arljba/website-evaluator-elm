@@ -12235,6 +12235,13 @@ var $author$project$Main$viewExpandStruct = function (model) {
 			]),
 		_List_fromArray(
 			[
+				A2(
+				$elm$html$Html$h1,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Hover over the displayed nodes to view what page it represents')
+					])),
 				$author$project$ForceDirectedGraph$viewGraph(
 				$author$project$ForceDirectedGraph$initGraph(
 					$author$project$Main$createGraph(model.structDetails.items))),

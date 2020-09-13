@@ -509,7 +509,9 @@ viewExpandStruct model =
             String.fromInt (List.length (model.structDetails.items |> List.filter (\record -> record.status /= 200)))
     in
     div [ class "struct-content-section" ]
-        [ initGraph (createGraph model.structDetails.items) |> viewGraph
+        [ h1 []
+            [ text "Hover over the displayed nodes to view what page it represents" ]     
+        , initGraph (createGraph model.structDetails.items) |> viewGraph
         , div [ class "card" ]
             [ div [ class "container" ]
                 [ h1 []
