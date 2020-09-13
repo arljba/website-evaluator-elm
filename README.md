@@ -56,7 +56,7 @@ This api checks how fast content on a website can be served to a user. Additiona
 This api returns the technology stack which is beeing used on a website. An example would be a website uses drupal as a cms apache as a webserver etc. Calls to this api are highly ristricted with a free license. 
 #### CustomApi
 The last api that is being used is an api written and hosted by myself. This api retrieves information about how pages on a website are being connected and also if these connections are not broken (dont return 400-500 codes).
-The endpoint is available at arne-baumann.de:9080/ and the project can be viewed here.
+The endpoint is available at http://arne-baumann.de:9080/ and the project can be viewed [here](https://github.com/arljba/website-evaluator-crawler).
 
 ### Next Steps
 The next step of the project would be to replace the highly restrictivy apis that are currently being used (e.g BuiltWithApi) and replace them with self developed apis.
