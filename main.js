@@ -5507,7 +5507,7 @@ var $author$project$Types$StructureDetails = function (items) {
 var $author$project$Main$initialModel = {
 	apiSelection: A4($author$project$Types$ApiSelection, false, false, false, false),
 	domainOwnershipDetails: A3($author$project$Types$DomainOwnershipDetails, '', '', ''),
-	domainStatus: 'Not Started',
+	domainStatus: 'Nothing',
 	input: '',
 	isValidUrl: false,
 	showDomainDetails: false,
@@ -5515,11 +5515,11 @@ var $author$project$Main$initialModel = {
 	showStackDetails: false,
 	showStructDetails: false,
 	speedDetails: A3($author$project$Types$SpeedDetails, 0, 0, 0),
-	speedStatus: 'Not Started',
+	speedStatus: 'Nothing',
 	stackDetails: $author$project$Types$StackDetails(_List_Nil),
-	stackStatus: 'Not Started',
+	stackStatus: 'Nothing',
 	structDetails: $author$project$Types$StructureDetails(_List_Nil),
-	structStatus: 'Not Started',
+	structStatus: 'Nothing',
 	websiteUrl: $elm$core$Maybe$Nothing
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;

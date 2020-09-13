@@ -37,10 +37,10 @@ initialModel =
     , showStackDetails = False
     , showStructDetails = False
     , apiSelection = ApiSelection False False False False
-    , domainStatus = "Not Started"
-    , speedStatus = "Not Started"
-    , stackStatus = "Not Started"
-    , structStatus = "Not Started"
+    , domainStatus = "Nothing"
+    , speedStatus = "Nothing"
+    , stackStatus = "Nothing"
+    , structStatus = "Nothing"
     }
 
 
