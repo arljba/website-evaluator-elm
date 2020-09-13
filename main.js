@@ -9048,7 +9048,7 @@ var $author$project$Main$viewExpandDomain = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$Attributes$alt('Image'),
-								$elm$html$Html$Attributes$src('../images/persons-solid.svg')
+								$elm$html$Html$Attributes$src('./images/persons-solid.svg')
 							]),
 						_List_Nil),
 						A2(
@@ -9088,7 +9088,7 @@ var $author$project$Main$viewExpandDomain = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$Attributes$alt('Image'),
-								$elm$html$Html$Attributes$src('../images/map-solid.svg')
+								$elm$html$Html$Attributes$src('./images/map-solid.svg')
 							]),
 						_List_Nil),
 						A2(
@@ -9128,7 +9128,7 @@ var $author$project$Main$viewExpandDomain = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$Attributes$alt('Image'),
-								$elm$html$Html$Attributes$src('../images/globe-solid.svg')
+								$elm$html$Html$Attributes$src('./images/globe-solid.svg')
 							]),
 						_List_Nil),
 						A2(
@@ -9624,7 +9624,7 @@ var $author$project$Main$viewExpandSpeed = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$Attributes$alt('Image'),
-								$elm$html$Html$Attributes$src('../images/server-solid.svg')
+								$elm$html$Html$Attributes$src('./images/server-solid.svg')
 							]),
 						_List_Nil),
 						A2(
@@ -9670,7 +9670,7 @@ var $author$project$Main$viewExpandSpeed = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$Attributes$alt('Image'),
-								$elm$html$Html$Attributes$src('../images/paint-brush-solid.svg')
+								$elm$html$Html$Attributes$src('./images/paint-brush-solid.svg')
 							]),
 						_List_Nil),
 						A2(
@@ -9716,7 +9716,7 @@ var $author$project$Main$viewExpandSpeed = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$Attributes$alt('Image'),
-								$elm$html$Html$Attributes$src('../images/mouse-solid.svg')
+								$elm$html$Html$Attributes$src('./images/mouse-solid.svg')
 							]),
 						_List_Nil),
 						A2(
