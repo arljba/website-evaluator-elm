@@ -237,8 +237,6 @@ view model =
                 , span [ class "searchclear", onClick ClearModel ]
                     [ text "X" ]
                 ]
-            , img [ alt "Image", src "../images/github.svg" ]
-                []
             ]
         , viewInfo
         , viewDomain model
